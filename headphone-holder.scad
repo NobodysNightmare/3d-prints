@@ -1,13 +1,13 @@
 thickness = 5;
 width = 30;
 length = 80;
-alignerHeight = 8;
+alignerHeight = 16;
 screwPlateWidth = 20;
 
 armRadius = 75;
 armWidth = 45;
 armRailHeight = 20;
-armBBWidth = 80;
+armBBWidth = 30;
 armBBHeight = 50;
 
 hookWidth = 10;
