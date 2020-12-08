@@ -11,7 +11,9 @@ screwHeadRadius = 4;
 screwHeadHeight = 2;
 
 $fa = 4;
-$fs = 0.5;    
+$fs = 0.5;
+
+use <modules/nn-logo.scad>;
 
 module screwHole() {
     length = 100;
@@ -63,24 +65,9 @@ module holderArm() {
     }
 }
 
-module logo() {
-    logoScale = 0.45;
-    logoHeight = baseStrength / 2;
-    scale([logoScale, logoScale, 1]) {
-        difference() {
-            linear_extrude(logoHeight)
-                import("printable-avatar.svg", center = true);
-        
-            translate([0,0,logoHeight * 0.8])
-            linear_extrude(logoHeight)
-                import("avatar-border.svg", center = true);
-        }
-    }
-}
-
 
 union() {
     holderBase();
     holderArm();
-    logo();
+    nnLogo(39.6, baseStrength / 2);
 }
