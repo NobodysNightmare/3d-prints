@@ -3,7 +3,7 @@ innerRadius = 24;
 baseStrength = 6;
 armWidth = 30;
 armRail = 15;
-railSteepness = 0.75;
+railSteepness = 0.8;
 armStrength = 3;
 
 screwRadius = 2;
