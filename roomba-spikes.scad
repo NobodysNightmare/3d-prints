@@ -1,8 +1,9 @@
-innerRadius = 20;
-openWidth = 32;
-thickness = 5;
-width = 10;
-spikeLength = 20;
+innerRadius = 16.5 / 2;
+openWidth = 1.5;
+thickness = 3;
+width = 12;
+spikeLength = 15;
+groundClearance = 2;
 
 linear_extrude(width) {
     difference() {
@@ -18,8 +19,8 @@ linear_extrude(width) {
         translate([0, -innerRadius, 0])
             square([openWidth, thickness + innerRadius], true);
         
-        groundClearHeight = thickness + spikeLength;
-        translate([0, -(innerRadius + groundClearHeight / 2), 0])
-            square([innerRadius * 2 + thickness + spikeLength, groundClearHeight], true);
+        groundRemoverHeight = thickness + spikeLength;
+        translate([0, -(innerRadius + groundClearance + groundRemoverHeight / 2), 0])
+            square([innerRadius * 2 + thickness * 2 + spikeLength, groundRemoverHeight], true);
     }
 }
