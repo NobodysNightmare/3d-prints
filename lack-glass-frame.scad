@@ -8,13 +8,17 @@
 
 use <modules/screw-hole.scad>;
 
-printThickness = 2;
 glassThickness = 3;
+glassWidth = 438;
+glassHeight = 391;
+
+printThickness = 2;
 frameHeight = 12;
 
-screwHeadDiameter = 4; // TODO
-screwHeadHeight = 1; // TODO
-screwDiameter = 3; // TODO
+// 3.5 x 25 mm
+screwHeadDiameter = 6.8;
+screwHeadHeight = 2;
+screwDiameter = 3.5;
 screwMargin = 5;
 screwSideMargin = 12;
 
@@ -25,11 +29,14 @@ magnetThickness = 2;
 hingeDiameter = 5;
 hingeDepth = 40;
 hingeDistance = 0.5;
-hingeConnectorRatio = 0.9;
+hingeConnectorRatio = 1.0;
 hingeWiggle = 0.2;
 
 doorHingeWidth = 80;
 doorHingeHeight = 80;
+doorHingeLift = 1.8;
+
+hingeContactShiftLength = 10;
 
 $fa = 0.2;
 $fs = 0.5;
@@ -106,14 +113,15 @@ module bottomFrameHinge(width, height) {
         cube([doorHingeWidth, printThickness, height]);
     }
     
-    translate([-doorHingeWidth, printThickness, printThickness])
-    cube([doorHingeWidth, printThickness, frameHeight]);
+    translate([-doorHingeWidth + hingeContactShiftLength, printThickness, printThickness])
+    cube([doorHingeWidth - hingeContactShiftLength, printThickness, frameHeight]);
     
-    // TODO: diagonal change from normal frame level to
-    // hinged frame level (instead of sudden shift by 2 mm)
+    translate([-doorHingeWidth, 0, 0])
+    linear_extrude(frameHeight + printThickness)
+    polygon([[0, 0], [hingeContactShiftLength, printThickness], [hingeContactShiftLength, printThickness * 2], [0, printThickness]]);
     
     translate([-printThickness, -hingeYCenter, 0])
-    cube([printThickness, hingeYCenter, hingeDepth * hingeConnectorRatio]);
+    cube([printThickness, hingeYCenter + printThickness, hingeDepth * hingeConnectorRatio]);
     
     translate([-outerRadius, -hingeYCenter, 0])
     difference() {        
@@ -127,19 +135,19 @@ module topFrameHinge(width, height) {
 }
 
 module bottomDoorHinge() {
-    // TODO: leave space below door frame
     innerRadius = (hingeDiameter - hingeWiggle) / 2;
     outerRadius = hingeDiameter / 2 + printThickness;
     
     frameWidth = 2 * printThickness + glassThickness;
     hingeYCenterDistance = outerRadius + hingeDistance;
+    hingeBlockHeight = hingeDepth + doorHingeLift;
     
-    translate([0, 0, hingeDepth])
-    cylinder(hingeDepth, outerRadius, outerRadius);
+    translate([0, 0, hingeDepth - doorHingeLift])
+    cylinder(hingeBlockHeight, outerRadius, outerRadius);
     cylinder(hingeDepth, innerRadius, innerRadius);
     
-    translate([outerRadius - printThickness, 0, hingeDepth * (2 - hingeConnectorRatio)])
-    cube([printThickness, hingeYCenterDistance, hingeDepth * hingeConnectorRatio]);
+    translate([outerRadius - printThickness, 0, (hingeDepth - doorHingeLift) * (2 - hingeConnectorRatio)])
+    cube([printThickness, hingeYCenterDistance + 2 * printThickness + glassThickness, hingeBlockHeight * hingeConnectorRatio]);
 
     difference() {    
         union() {
@@ -153,7 +161,15 @@ module bottomDoorHinge() {
         
         translate([outerRadius - printThickness, hingeYCenterDistance, 0])
         cube([printThickness, frameWidth, hingeDepth * (2 - hingeConnectorRatio)]);
+        
+        translate([-doorHingeWidth + outerRadius, hingeYCenterDistance + glassThickness + printThickness, 0])
+        linear_extrude(frameHeight + printThickness)
+        polygon([[0, 0], [hingeContactShiftLength, printThickness], [hingeContactShiftLength, printThickness * 2], [0, printThickness]]);
     }
+}
+
+module topDoorHinge(width, height) {
+    scale([1, 1, -1]) bottomDoorHinge();
 }
 
 module doorLock(width) {
@@ -176,11 +192,13 @@ module magnetBag() {
     cube([printThickness, magnetThickness + 2 * printThickness, magnetWidth]);
 }
 
+/*
 color("grey")
 bottomFrameHinge(140, 140);
-translate([-hingeDiameter / 2 - printThickness, -(hingeDiameter / 2 + hingeDistance + 3 * printThickness + glassThickness), 0.1])
-rotate([0, 0, 0])
+translate([-hingeDiameter / 2 - printThickness, -(hingeDiameter / 2 + hingeDistance + 3 * printThickness + glassThickness), doorHingeLift + 0.1])
+rotate([0, 0, 0.5])
 bottomDoorHinge();
+*/
 
 // window:
 //  - 2x middleFrame(166) top/bottom
@@ -214,7 +232,7 @@ cube([438, glassThickness, 391]);
 //  - 1x topDoorHinge
 //  - 1x bottomDoorHinge
 //  - 1x doorHandle
-/*
+
 cornerDoorStop(140, 140);
 translate([140, 0, 0]) middleDoorStop(166);
 translate([446, 0, 0]) bottomFrameHinge(140, 140);
@@ -228,10 +246,15 @@ translate([446, 0, 2 * 140 + 119]) topFrameHinge(140, 140);
 translate([0, 0, 140 + 119])rotate([0, 90, 0]) doorLock(119);
 translate([2 * 140 + 166, 0, 140])rotate([0, -90, 0]) middleDoorStop(119);
 
-// TODO: position glass correctly
-// TODO: attach glass elements (hinges and handle)
+// TODO: attach handle to glass
 
-translate([printThickness, -glassThickness, printThickness])
-color("blue", 0.3)
-cube([438, glassThickness, 391]);
-*/
+translate([-hingeDiameter / 2 - printThickness + 446, -(hingeDiameter / 2 + hingeDistance + 3 * printThickness + glassThickness), doorHingeLift + 0.1])
+rotate([0, 0, 0.0]) {
+    bottomDoorHinge();
+        
+    translate([0, 0, glassHeight + doorHingeLift + printThickness]) topDoorHinge();
+
+    translate([-glassWidth + hingeDiameter / 2, glassThickness + 2 * printThickness, printThickness])
+    color("blue", 0.3)
+    cube([glassWidth, glassThickness, glassHeight]);
+}
