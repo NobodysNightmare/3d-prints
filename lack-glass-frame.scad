@@ -38,6 +38,11 @@ doorHingeLift = 1.8;
 
 hingeContactShiftLength = 10;
 
+handleWidth = 60;
+handleHeight = 20;
+handleLift = 20;
+handleStraightRate = 0.8;
+
 $fa = 0.2;
 $fs = 0.5;
 
@@ -173,11 +178,43 @@ module topDoorHinge(width, height) {
 }
 
 module doorLock(width) {
-    // TODO: accomodate door handle
+    raiserDistance = width / 2 - magnetLength;
+    
     middleDoorStop(width);
     
-    translate([width / 2 - magnetLength / 2 - printThickness, 0, printThickness])
+    translate([0, printThickness, printThickness + frameHeight])
+    rotate([90, 0, 0])
+    linear_extrude(printThickness)
+    polygon([
+        [0, 0],
+        [raiserDistance, frameHeight],
+        [width - raiserDistance, frameHeight],
+        [width, 0]
+    ]);
+    
+    translate([width / 2 - magnetLength / 2 - printThickness, 0, printThickness + 2])
     magnetBag();
+}
+
+module doorHandle() {
+    translate([0, 0, magnetLength + 2 * printThickness])
+    rotate([0, 90, 0]) {
+        framePiece(magnetLength + 2 * printThickness);
+        
+        translate([0, -magnetThickness - printThickness, 0])
+        magnetBag();
+    }
+    
+    diagonalEnd = (1 - handleStraightRate) * handleWidth;
+    linear_extrude(handleHeight)
+    polygon([
+        [0, -magnetThickness - printThickness],
+        [diagonalEnd, -handleLift],
+        [diagonalEnd + printThickness, -handleLift],
+        [printThickness, -magnetThickness - printThickness]
+    ]);
+    translate([diagonalEnd, -handleLift, 0])
+    cube([handleStraightRate * handleWidth, printThickness, handleHeight]);
 }
 
 module magnetBag() {
@@ -192,7 +229,10 @@ module magnetBag() {
     cube([printThickness, magnetThickness + 2 * printThickness, magnetWidth]);
 }
 
+//doorLock(100);
+
 /*
+// hinge mechanism
 color("grey")
 bottomFrameHinge(140, 140);
 translate([-hingeDiameter / 2 - printThickness, -(hingeDiameter / 2 + hingeDistance + 3 * printThickness + glassThickness), doorHingeLift + 0.1])
@@ -246,13 +286,14 @@ translate([446, 0, 2 * 140 + 119]) topFrameHinge(140, 140);
 translate([0, 0, 140 + 119])rotate([0, 90, 0]) doorLock(119);
 translate([2 * 140 + 166, 0, 140])rotate([0, -90, 0]) middleDoorStop(119);
 
-// TODO: attach handle to glass
-
 translate([-hingeDiameter / 2 - printThickness + 446, -(hingeDiameter / 2 + hingeDistance + 3 * printThickness + glassThickness), doorHingeLift + 0.1])
 rotate([0, 0, 0.0]) {
     bottomDoorHinge();
         
     translate([0, 0, glassHeight + doorHingeLift + printThickness]) topDoorHinge();
+    
+    translate([-glassWidth, glassThickness + printThickness, glassHeight / 2 - magnetLength / 2])
+    doorHandle();
 
     translate([-glassWidth + hingeDiameter / 2, glassThickness + 2 * printThickness, printThickness])
     color("blue", 0.3)
