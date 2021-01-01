@@ -43,6 +43,13 @@ handleHeight = 20;
 handleLift = 20;
 handleStraightRate = 0.8;
 
+ptfePassthroughLength = 52;
+ptfeEntryInnerDiameter = 4.8;
+ptfeEntryOuterDiameter = 7.2;
+ptfeExitInnerDiameter = 4;
+ptfeExitOuterDiameter = 8;
+ptfePassthroughLip = 5;
+
 $fa = 0.2;
 $fs = 0.5;
 
@@ -229,7 +236,20 @@ module magnetBag() {
     cube([printThickness, magnetThickness + 2 * printThickness, magnetWidth]);
 }
 
-//doorLock(100);
+module ptfePassthrough() {
+    difference() {
+        union() {
+            translate([0, 0, printThickness])
+            cylinder(ptfePassthroughLength, ptfeExitOuterDiameter / 2, ptfeEntryOuterDiameter / 2);
+            
+            cylinder(printThickness, ptfeExitOuterDiameter / 2 + ptfePassthroughLip, ptfeExitOuterDiameter / 2 + ptfePassthroughLip);
+        }
+        
+        cylinder(ptfePassthroughLength + printThickness, ptfeExitInnerDiameter / 2, ptfeEntryInnerDiameter / 2);
+    }
+}
+
+ptfePassthrough();
 
 /*
 // hinge mechanism
@@ -272,7 +292,7 @@ cube([438, glassThickness, 391]);
 //  - 1x topDoorHinge
 //  - 1x bottomDoorHinge
 //  - 1x doorHandle
-
+/*
 cornerDoorStop(140, 140);
 translate([140, 0, 0]) middleDoorStop(166);
 translate([446, 0, 0]) bottomFrameHinge(140, 140);
@@ -299,3 +319,4 @@ rotate([0, 0, 0.0]) {
     color("blue", 0.3)
     cube([glassWidth, glassThickness, glassHeight]);
 }
+*/
