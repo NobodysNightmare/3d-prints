@@ -156,8 +156,7 @@ module bottomDoorHinge(hingeBlockModifier = doorHingeLift) {
     
     translate([0, 0, hingeDepth - hingeBlockModifier])
     cylinder(hingeBlockHeight, outerRadius, outerRadius);
-    translate([0, 0, - hingeBlockModifier])
-    cylinder(hingeDepth, innerRadius, innerRadius);
+    cylinder(hingeDepth - hingeBlockModifier, innerRadius, innerRadius);
     
     translate([outerRadius - printThickness, 0, (hingeDepth - hingeBlockModifier) * (2 - hingeConnectorRatio)])
     cube([printThickness, hingeYCenterDistance + 2 * printThickness + glassThickness, hingeBlockHeight * hingeConnectorRatio]);
