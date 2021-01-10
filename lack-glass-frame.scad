@@ -8,7 +8,7 @@
 
 use <modules/screw-hole.scad>;
 
-glassThickness = 3;
+glassThickness = 3.1;
 glassWidth = 438;
 glassHeight = 391;
 
@@ -30,7 +30,7 @@ hingeDiameter = 5;
 hingeDepth = 40;
 hingeDistance = 0.5;
 hingeConnectorRatio = 1.0;
-hingeWiggle = 0.2;
+hingeWiggle = 0.4;
 
 doorHingeWidth = 80;
 doorHingeHeight = 80;
@@ -146,19 +146,20 @@ module topFrameHinge(width, height) {
     scale([1, 1, -1]) bottomFrameHinge(width, height);
 }
 
-module bottomDoorHinge() {
+module bottomDoorHinge(hingeBlockModifier = doorHingeLift) {
     innerRadius = (hingeDiameter - hingeWiggle) / 2;
     outerRadius = hingeDiameter / 2 + printThickness;
     
     frameWidth = 2 * printThickness + glassThickness;
     hingeYCenterDistance = outerRadius + hingeDistance;
-    hingeBlockHeight = hingeDepth + doorHingeLift;
+    hingeBlockHeight = hingeDepth + hingeBlockModifier;
     
-    translate([0, 0, hingeDepth - doorHingeLift])
+    translate([0, 0, hingeDepth - hingeBlockModifier])
     cylinder(hingeBlockHeight, outerRadius, outerRadius);
+    translate([0, 0, - hingeBlockModifier])
     cylinder(hingeDepth, innerRadius, innerRadius);
     
-    translate([outerRadius - printThickness, 0, (hingeDepth - doorHingeLift) * (2 - hingeConnectorRatio)])
+    translate([outerRadius - printThickness, 0, (hingeDepth - hingeBlockModifier) * (2 - hingeConnectorRatio)])
     cube([printThickness, hingeYCenterDistance + 2 * printThickness + glassThickness, hingeBlockHeight * hingeConnectorRatio]);
 
     difference() {    
@@ -181,7 +182,7 @@ module bottomDoorHinge() {
 }
 
 module topDoorHinge(width, height) {
-    scale([1, 1, -1]) bottomDoorHinge();
+    scale([1, 1, -1]) bottomDoorHinge(-doorHingeLift);
 }
 
 module doorLock(width) {
