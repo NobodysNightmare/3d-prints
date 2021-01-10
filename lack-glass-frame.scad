@@ -204,21 +204,29 @@ module doorLock(width) {
 }
 
 module doorHandle() {
-    translate([0, 0, magnetLength + 2 * printThickness])
-    rotate([0, 90, 0]) {
-        framePiece(magnetLength + 2 * printThickness);
+    grippingHeight = magnetLength + 4 * printThickness;
+    grippingWidth = 2 * magnetWidth + printThickness;
+    
+    difference() {
+        union() {
+            cube([printThickness, printThickness + glassThickness, grippingHeight]);
+            cube([printThickness + grippingWidth, printThickness, grippingHeight]);
+            
+            translate([0, printThickness + glassThickness, 0])
+            cube([printThickness + grippingWidth, magnetThickness + 0.8, grippingHeight]);
+        }
         
-        translate([0, -magnetThickness - printThickness, 0])
-        magnetBag();
+        translate([0, printThickness + glassThickness, 2 * printThickness])
+        cube([printThickness + 2 * magnetWidth, magnetThickness, magnetLength]);
     }
     
     diagonalEnd = (1 - handleStraightRate) * handleWidth;
     linear_extrude(handleHeight)
     polygon([
-        [0, -magnetThickness - printThickness],
+        [0, 0],
         [diagonalEnd, -handleLift],
         [diagonalEnd + printThickness, -handleLift],
-        [printThickness, -magnetThickness - printThickness]
+        [printThickness, 0]
     ]);
     translate([diagonalEnd, -handleLift, 0])
     cube([handleStraightRate * handleWidth, printThickness, handleHeight]);
@@ -249,7 +257,7 @@ module ptfePassthrough() {
     }
 }
 
-ptfePassthrough();
+doorHandle();
 
 /*
 // hinge mechanism
