@@ -43,15 +43,16 @@ handleHeight = 20;
 handleLift = 20;
 handleStraightRate = 0.8;
 
-ptfePassthroughLength = 52;
+ptfePassthroughLength = 72;
 ptfeEntryInnerDiameter = 4.8;
 ptfeEntryOuterDiameter = 7.2;
 ptfeExitInnerDiameter = 4;
 ptfeExitOuterDiameter = 8;
-ptfePassthroughLip = 5;
+ptfePassthroughLip = 7;
+ptfePassthroughRounding = 1;
 
-$fa = 0.2;
-$fs = 0.5;
+$fa = 0.1;
+$fs = 0.2;
 
 module framePiece(width) {
     cube([width, glassThickness + 2 * printThickness, printThickness]);
@@ -244,20 +245,32 @@ module magnetBag() {
     cube([printThickness, magnetThickness + 2 * printThickness, magnetWidth]);
 }
 
-module ptfePassthrough() {
+module ptfePassthrough() {    
     difference() {
         union() {
             translate([0, 0, printThickness])
             cylinder(ptfePassthroughLength, ptfeExitOuterDiameter / 2, ptfeEntryOuterDiameter / 2);
             
-            cylinder(printThickness, ptfeExitOuterDiameter / 2 + ptfePassthroughLip, ptfeExitOuterDiameter / 2 + ptfePassthroughLip);
+            difference() {
+                translate([0, 0, ptfePassthroughRounding])
+                minkowski() {
+                    cylinder(printThickness, ptfeExitOuterDiameter / 2 + ptfePassthroughLip - ptfePassthroughRounding, ptfeExitOuterDiameter / 2 + ptfePassthroughLip - ptfePassthroughRounding);
+                    
+                    sphere(ptfePassthroughRounding);
+                }
+                
+                cutCubeSize = ptfeExitOuterDiameter + ptfePassthroughLip * 2 + ptfePassthroughRounding * 2;
+                
+                translate([-cutCubeSize / 2, -cutCubeSize / 2, printThickness])
+                cube([cutCubeSize, cutCubeSize, ptfePassthroughRounding * 2]);
+            }
         }
         
         cylinder(ptfePassthroughLength + printThickness, ptfeExitInnerDiameter / 2, ptfeEntryInnerDiameter / 2);
     }
 }
 
-doorHandle();
+ptfePassthrough();
 
 /*
 // hinge mechanism
