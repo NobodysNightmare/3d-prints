@@ -3,7 +3,7 @@ columnSpacing = 150;
 
 shelfRowDiameter = 24;
 shelfRowDepth = 140;
-shelfRowStepping = $preview ? 0.2 : 0.1;
+shelfRowStepping = $preview ? 20 : 0.5;
 
 bottomShelfRowThickness = 2.4;
 
@@ -64,26 +64,30 @@ module bottomShelfRow() {
         translate([-shelfRowDiameter / 2, 0, 0])
         cube([columnSpacing + shelfRowDiameter, shelfRowDiameter, shelfRowDiameter]);
         
-        translate([interpolateShelfRowX(1), -interpolateShelfRowY(1), bottomShelfRowThickness])
+        translate([interpolateShelfRowX(100), -interpolateShelfRowY(100), bottomShelfRowThickness])
         screwHole(screwDiameter, screwHeadDiameter, screwHeadHeight);
         
-        translate([interpolateShelfRowX(0.2), -interpolateShelfRowY(0.2), bottomShelfRowThickness])
+        translate([interpolateShelfRowX(20), -interpolateShelfRowY(20), bottomShelfRowThickness])
         screwHole(screwDiameter, screwHeadDiameter, screwHeadHeight);
         
         translate([columnSpacing, 0, 0])
         scale([-1, 1, 1])
-        translate([interpolateShelfRowX(0.2), -interpolateShelfRowY(0.2), bottomShelfRowThickness])
+        translate([interpolateShelfRowX(20), -interpolateShelfRowY(20), bottomShelfRowThickness])
         screwHole(screwDiameter, screwHeadDiameter, screwHeadHeight);
     }
 }
 
 module bottomShelfRowHalf() {
     linear_extrude(bottomShelfRowThickness)
-    for(p = [0:shelfRowStepping:1 - shelfRowStepping]) {
+    for(p = [0:shelfRowStepping:100 - shelfRowStepping]) {
         x = interpolateShelfRowX(p);
         y = interpolateShelfRowY(p);
         nx = interpolateShelfRowX(p + shelfRowStepping);
         ny = interpolateShelfRowY(p + shelfRowStepping);
+        
+        echo("--------");
+        echo(p);
+        echo(p + shelfRowStepping);
 
         hull() {
             translate([x, -y, 0])
@@ -110,15 +114,15 @@ module shelfRow(nutHoles = false) {
         
         if(nutHoles) {
             nutZOffset = shelfRowDiameter / 2 - nutHoldThickness;
-            translate([interpolateShelfRowX(1), -interpolateShelfRowY(1), nutZOffset])
+            translate([interpolateShelfRowX(100), -interpolateShelfRowY(100), nutZOffset])
             nutHole(nutDiameterS, screwDiameter);
             
-            translate([interpolateShelfRowX(0.2), -interpolateShelfRowY(0.2), nutZOffset])
+            translate([interpolateShelfRowX(20), -interpolateShelfRowY(20), nutZOffset])
             nutHole(nutDiameterS, screwDiameter);
             
             translate([columnSpacing, 0, 0])
             scale([-1, 1, 1])
-            translate([interpolateShelfRowX(0.2), -interpolateShelfRowY(0.2), nutZOffset])
+            translate([interpolateShelfRowX(20), -interpolateShelfRowY(20), nutZOffset])
             nutHole(nutDiameterS, screwDiameter);
         }
     }
@@ -126,7 +130,7 @@ module shelfRow(nutHoles = false) {
 
 module shelfRowHalf() {
     translate([0, 0, shelfRowDiameter / 2])
-    for(p = [0:shelfRowStepping:1 - shelfRowStepping]) {
+    for(p = [0:shelfRowStepping:100 - shelfRowStepping]) {
         x = interpolateShelfRowX(p);
         y = interpolateShelfRowY(p);
         nx = interpolateShelfRowX(p + shelfRowStepping);
@@ -146,8 +150,8 @@ module shelfRowHalf() {
     }
 }
 
-function interpolateShelfRowX(p) = (p * p) * columnSpacing / 2;
-function interpolateShelfRowY(p) = p * shelfRowDepth;
+function interpolateShelfRowX(p) = ((p / 100) * (p / 100)) * columnSpacing / 2;
+function interpolateShelfRowY(p) = (p / 100) * shelfRowDepth;
 
 spoolShelf();
 
