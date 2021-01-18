@@ -5,7 +5,13 @@ shelfRowDiameter = 24;
 shelfRowDepth = 140;
 shelfRowStepping = $preview ? 0.2 : 0.1;
 
-bottomShelfRowThickness = 2;
+bottomShelfRowThickness = 2.4;
+
+screwDiameter = 3.2;
+screwHeadDiameter = 6.2;
+screwHeadHeight = 1.7;
+nutDiameterS = 5.8;
+nutHoldThickness = 3;
 
 spoolHeight = 60;
 
@@ -16,6 +22,8 @@ $fs = $preview ? 2 : 1;
 
 // TODO: add drilling holes towards bottom
 // TODO: add stacking method towards top
+
+use <modules/screw-hole.scad>
 
 module spoolShelf() {
     column();
@@ -29,7 +37,7 @@ module spoolShelf() {
         shelfRow();
         
         translate([0, 0, spoolHeight + shelfRowDiameter / 2])
-        shelfRow();
+        shelfRow(true);
     }
 }
 
@@ -55,6 +63,17 @@ module bottomShelfRow() {
         
         translate([-shelfRowDiameter / 2, 0, 0])
         cube([columnSpacing + shelfRowDiameter, shelfRowDiameter, shelfRowDiameter]);
+        
+        translate([interpolateShelfRowX(1), -interpolateShelfRowY(1), bottomShelfRowThickness])
+        screwHole(screwDiameter, screwHeadDiameter, screwHeadHeight);
+        
+        translate([interpolateShelfRowX(0.2), -interpolateShelfRowY(0.2), bottomShelfRowThickness])
+        screwHole(screwDiameter, screwHeadDiameter, screwHeadHeight);
+        
+        translate([columnSpacing, 0, 0])
+        scale([-1, 1, 1])
+        translate([interpolateShelfRowX(0.2), -interpolateShelfRowY(0.2), bottomShelfRowThickness])
+        screwHole(screwDiameter, screwHeadDiameter, screwHeadHeight);
     }
 }
 
@@ -76,7 +95,7 @@ module bottomShelfRowHalf() {
     }
 }
 
-module shelfRow() {
+module shelfRow(nutHoles = false) {
     difference() {
         union() {
             shelfRowHalf();
@@ -88,6 +107,20 @@ module shelfRow() {
         
         translate([-shelfRowDiameter / 2, 0, 0])
         cube([columnSpacing + shelfRowDiameter, shelfRowDiameter, shelfRowDiameter]);
+        
+        if(nutHoles) {
+            nutZOffset = shelfRowDiameter / 2 - nutHoldThickness;
+            translate([interpolateShelfRowX(1), -interpolateShelfRowY(1), nutZOffset])
+            nutHole(nutDiameterS, screwDiameter);
+            
+            translate([interpolateShelfRowX(0.2), -interpolateShelfRowY(0.2), nutZOffset])
+            nutHole(nutDiameterS, screwDiameter);
+            
+            translate([columnSpacing, 0, 0])
+            scale([-1, 1, 1])
+            translate([interpolateShelfRowX(0.2), -interpolateShelfRowY(0.2), nutZOffset])
+            nutHole(nutDiameterS, screwDiameter);
+        }
     }
 }
 
