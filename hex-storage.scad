@@ -1,4 +1,4 @@
-outerRadiusLong = 42;
+outerRadiusL = 42;
 thickness = 2.4;
 bottomThickness = 1.2;
 height = 77;
@@ -10,14 +10,17 @@ gripFrontWiggle = 0.1;
 gripSideWiggle = 0.3;
 gripOffset = 10;
 
-outerRadiusShort = outerRadiusLong * sqrt(3) / 2;
-innerRadiusLong = outerRadiusLong - thickness; // TODO: that's slightly too long
+gridRadiusMultiplier = 0.4;
+gridThickness = 1;
+
+outerRadiusS = outerRadiusL * sqrt(3) / 2;
+innerRadiusL = outerRadiusL - thickness; // TODO: that's slightly too long
 
 module wall() {
     linear_extrude(height) {
         difference() {
             insetX = gripOffset + gripStartWidth / 2;
-            square([outerRadiusLong, thickness]);
+            square([outerRadiusL, thickness]);
             
             polygon([
                 [insetX - gripStartWidth / 2, thickness],
@@ -27,7 +30,7 @@ module wall() {
             ]);
         }
         
-        outsetX = outerRadiusLong - gripOffset - gripStartWidth / 2;
+        outsetX = outerRadiusL - gripOffset - gripStartWidth / 2;
         polygon([
                 [outsetX - gripStartWidth / 2 + gripSideWiggle, thickness],
                 [outsetX - gripEndWidth / 2 + gripSideWiggle, thickness + gripDepth - gripFrontWiggle],
@@ -40,34 +43,55 @@ module wall() {
 module hexFrame() {
     for(r = [0:60:360]) {
         rotate([0, 0, r])
-        translate([-outerRadiusLong / 2, outerRadiusShort - thickness, 0])
+        translate([-outerRadiusL / 2, outerRadiusS - thickness, 0])
         wall();
     }
 }
 
-module hexSolidBottom() {
-    rotate([0, 0, 30])
+module hexSolidBottom(radiusL = innerRadiusL) {
     linear_extrude(bottomThickness)
+    hex2D(radiusL);
+}
+
+module hexGridBottom() {
+    gridRadiusL = innerRadiusL * gridRadiusMultiplier;
+    gridRadiusS = gridRadiusL * sqrt(3) / 2;
+    
+    linear_extrude(bottomThickness)
+    difference() {
+        hex2D(innerRadiusL);
+        
+        hex2D(gridRadiusL);
+        
+        for(direction = [0:60:360]) {
+            translate([sin(direction) * (gridRadiusS * 2 + gridThickness), cos(direction) * (gridRadiusS * 2 + gridThickness)])
+            hex2D(gridRadiusL);
+        }
+    }
+}
+
+module hex2D(radiusL) {
+    rotate([0, 0, 30])
     polygon([
-        [sin(0) * innerRadiusLong, cos(0) * innerRadiusLong],
-        [sin(60) * innerRadiusLong, cos(60) * innerRadiusLong],
-        [sin(120) * innerRadiusLong, cos(120) * innerRadiusLong],
-        [sin(180) * innerRadiusLong, cos(180) * innerRadiusLong],
-        [sin(240) * innerRadiusLong, cos(240) * innerRadiusLong],
-        [sin(300) * innerRadiusLong, cos(300) * innerRadiusLong]
+        [sin(0) * radiusL, cos(0) * radiusL],
+        [sin(60) * radiusL, cos(60) * radiusL],
+        [sin(120) * radiusL, cos(120) * radiusL],
+        [sin(180) * radiusL, cos(180) * radiusL],
+        [sin(240) * radiusL, cos(240) * radiusL],
+        [sin(300) * radiusL, cos(300) * radiusL]
     ]);
 }
 
 module fittingTest() {
     for(r = [0:60:60]) {
         rotate([0, 0, r])
-        translate([-outerRadiusLong / 2, outerRadiusShort - thickness, 0])
+        translate([-outerRadiusL / 2, outerRadiusS - thickness, 0])
         wall();
     }
 }
 
-hexSolidBottom();
+hexGridBottom();
 hexFrame();
 
-//fitDistance = 0.1 + outerRadiusShort * 2;
+//fitDistance = 0.1 + outerRadiusS * 2;
 //translate([sin(60) * fitDistance, cos(60) * fitDistance, 0]) hexFrame();
