@@ -1,27 +1,30 @@
+innerRadius = 45;
 threadWallThickness = 3;
-grillThickness = 2;
-wallThickness = 8;
 verticalThickness = 2;
+waterCollectorHeight = 10;
 
+grillThickness = 2;
 grillHeight = 2;
-boxBottomHeight = 10 + grillHeight + verticalThickness;
-
-innerRadius = 50;
-capInnerRadius = innerRadius - 1;
-
 grillHoleSize = 12;
-grillGridSize = ceil((2 * innerRadius) / grillHoleSize);
 
-outerRadius = innerRadius + wallThickness;
-grillRadius = innerRadius + grillThickness;
-
-threadOuterRadius = outerRadius - threadWallThickness;
 threadHeight = 20;
 threadPitch = 6;
 
-totalHeight = boxBottomHeight + threadHeight + verticalThickness;
-
 tolerance = 0.2;
+
+boxBottomHeight = waterCollectorHeight + grillHeight + verticalThickness;
+
+
+grillGridSize = ceil((2 * innerRadius) / grillHoleSize);
+
+
+
+outerRadius = innerRadius + threadWallThickness + threadPitch;
+grillRadius = innerRadius + grillThickness;
+
+threadOuterRadius = outerRadius - threadWallThickness;
+
+totalHeight = boxBottomHeight + threadHeight + verticalThickness;
 
 $fa = $preview ? 10 : 1;
 
@@ -54,7 +57,7 @@ module soapCap() {
     difference() {
         metric_thread(diameter = threadOuterRadius * 2, length = threadHeight - tolerance, internal = false, pitch = threadPitch, leadin = 1);
         
-        cylinder(threadHeight, r = capInnerRadius);
+        cylinder(threadHeight, r = innerRadius);
     }
 }
 
@@ -97,4 +100,4 @@ module testAssemblyCut() {
     }
 }
 
-soapGrill();
+soapBox();
