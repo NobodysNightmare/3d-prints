@@ -10,6 +10,10 @@ grillHoleSize = 12;
 threadHeight = 20;
 threadPitch = 6;
 
+capGripHeight = 5;
+capGripRecessCount = 15;
+capGripRecessRadius = 10;
+
 tolerance = 0.2;
 
 boxBottomHeight = waterCollectorHeight + grillHeight + verticalThickness;
@@ -24,7 +28,7 @@ grillRadius = innerRadius + grillThickness;
 
 threadOuterRadius = outerRadius - threadWallThickness;
 
-totalHeight = boxBottomHeight + threadHeight + verticalThickness;
+totalHeight = boxBottomHeight + threadHeight + capGripHeight;
 
 $fa = $preview ? 10 : 1;
 
@@ -51,9 +55,17 @@ module soapBox() {
 }
 
 module soapCap() {
-    cylinder(verticalThickness, r = outerRadius);
+    difference() {
+        cylinder(capGripHeight, r = outerRadius);
+        
+        for(rotation = [0:360/capGripRecessCount:360]) {
+            rotate([0, 0, rotation])
+            translate([outerRadius + capGripRecessRadius / 2, 0, -capGripRecessRadius / 2])
+            sphere(capGripRecessRadius);
+        }
+    }
     
-    translate([0, 0, verticalThickness])
+    translate([0, 0, capGripHeight])
     difference() {
         metric_thread(diameter = threadOuterRadius * 2, length = threadHeight - tolerance, internal = false, pitch = threadPitch, leadin = 1);
         
