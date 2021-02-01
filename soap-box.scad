@@ -1,7 +1,8 @@
 innerRadius = 45;
 threadWallThickness = 3;
-verticalThickness = 2;
+floorHeight = 2;
 waterCollectorHeight = 10;
+chamferSize = 2;
 
 grillThickness = 2;
 grillHeight = 2;
@@ -9,6 +10,7 @@ grillHoleSize = 12;
 
 threadHeight = 20;
 threadPitch = 6;
+threadToleranceScaling = 1.006;
 
 capGripHeight = 5;
 capGripRecessCount = 15;
@@ -16,7 +18,7 @@ capGripRecessRadius = 10;
 
 tolerance = 0.2;
 
-boxBottomHeight = waterCollectorHeight + grillHeight + verticalThickness;
+boxBottomHeight = waterCollectorHeight + grillHeight + floorHeight;
 
 
 grillGridSize = ceil((2 * innerRadius) / grillHoleSize);
@@ -39,17 +41,23 @@ module soapBox() {
     difference() {
         cylinder(boxBottomHeight, r = outerRadius);
         
-        translate([0, 0, verticalThickness])
+        // water collector
+        translate([0, 0, floorHeight])
         cylinder(boxBottomHeight, r = innerRadius);
         
+        // grill holder
         translate([0, 0, boxBottomHeight - grillHeight - tolerance])
         cylinder(grillHeight + tolerance + 0.01, r = grillRadius + tolerance);
+        
+        // smoothed bottom edge
+        chamfer();
     }
     
     translate([0, 0, boxBottomHeight])
     difference() {
         cylinder(threadHeight, r = outerRadius);
         
+        scale([threadToleranceScaling, threadToleranceScaling, 1])
         metric_thread(diameter = threadOuterRadius * 2, length = threadHeight, internal = true, pitch = threadPitch, leadin = 1);
     }
 }
@@ -63,6 +71,8 @@ module soapCap() {
             translate([outerRadius + capGripRecessRadius / 2, 0, -capGripRecessRadius / 2])
             sphere(capGripRecessRadius);
         }
+        
+        chamfer();
     }
     
     translate([0, 0, capGripHeight])
@@ -94,7 +104,15 @@ module soapGrill() {
     }
 }
 
-module testAssemblyCut() {
+module chamfer() {
+    difference() {
+        translate([-outerRadius, -outerRadius, 0])
+        cube([outerRadius * 2, outerRadius * 2, chamferSize]);
+        cylinder(chamferSize, outerRadius - chamferSize / 2, outerRadius + chamferSize / 2);
+    }
+}
+
+module testAssemblyCut(inspectionRotation = 0) {
     difference() {
         union() {
             soapBox();
@@ -107,6 +125,7 @@ module testAssemblyCut() {
             soapCap();
         }
         
+        rotate([0, 0, inspectionRotation])
         translate([-outerRadius, 0, -tolerance / 2])
         cube([outerRadius * 2, outerRadius, totalHeight + 2 * tolerance]);
     }
