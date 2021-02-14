@@ -1,3 +1,5 @@
+M73 P0 R5 ; Print progress
+
 G90 ; use absolute coordinates
 G28 ; home all without mesh bed level
 
@@ -46,3 +48,4 @@ G0 X140 Y80 F2160
 
 M400 ; wait for moves to finish
 M84 ; disable motors
+M73 P100 R0 ; Print progress
