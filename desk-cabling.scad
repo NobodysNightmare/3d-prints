@@ -1,7 +1,7 @@
 width = 80;
 sideMargin = 12;
 thickness = 2;
-deskPlateThickness = 34;
+deskPlateThickness = 24.9;
 grabDepth = 40;
 holderHeight = 20;
 
