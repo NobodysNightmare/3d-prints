@@ -7,6 +7,9 @@ holderHeight = 20;
 
 cableDiameters = [7, 5, 5, 4];
 
+$fa = 0.5;
+$fs = 0.5;
+
 module cableHole(cableDiameter) {
     radius = (cableDiameter + 2) / 2;
     holeDepth = holderHeight / 2;
