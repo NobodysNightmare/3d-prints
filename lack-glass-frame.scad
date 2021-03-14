@@ -270,7 +270,19 @@ module ptfePassthrough() {
     }
 }
 
-ptfePassthrough();
+module ptfePassthroughLock() {
+    entryWidth = printThickness / 2;
+    difference() {
+        cylinder(printThickness, ptfeExitOuterDiameter / 2 + ptfePassthroughLip, ptfeExitOuterDiameter / 2 + ptfePassthroughLip);
+        
+        cylinder(printThickness, ptfeEntryOuterDiameter / 2, ptfeEntryOuterDiameter / 2);
+        
+        translate([-entryWidth / 2, 0, 0])
+        cube([entryWidth, ptfeExitOuterDiameter + ptfePassthroughLip, printThickness]);
+    }
+}
+
+ptfePassthroughLock();
 
 /*
 // hinge mechanism
