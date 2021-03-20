@@ -3,11 +3,12 @@ neckThickness = 4;
 printThickness = 3;
 
 wallSeparation = 15;
+aspectRatio = 0.86;
 
 gripHeight = 8 + printThickness;
-gripThickness = 5;
+gripThickness = 4.5;
 
-totalDepth = neckDiameter + 2 * neckThickness;
+totalDepth = aspectRatio * neckDiameter + 2 * neckThickness;
 leftEnd = -(wallSeparation + neckDiameter / 2);
 
 $fa = 1;
@@ -19,8 +20,12 @@ difference() {
         translate([leftEnd, 0, 0])
         square([1, totalDepth], center = true);
         
-        circle(d = totalDepth);
+        offset(neckThickness)
+        scale([1, aspectRatio, 1])
+        circle(d = neckDiameter);
     }
+    
+    scale([1, aspectRatio, 1])
     circle(d = neckDiameter);
 }
 
