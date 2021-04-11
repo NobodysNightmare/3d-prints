@@ -3,28 +3,6 @@ verticalThickness = 1.2;
 
 tolerance = 0.1;
 
-boardWidth = 54.5;
-boardDepth = 28;
-
-displayWidth = 26;
-displayHeight = 14;
-displayBoardWidth = 27.5 + 0.8;
-displayBoardHeight = 28;
-displayBoardThickness = 1.2 + 0.4;
-displayTotalThickness = 3.8;
-
-displayTopOffset = 5;
-displayGrip = displayTopOffset * 0.8;
-displaySideGrip = 2.5;
-
-displayTopMargin = 10;
-displayBottomMargin = 10;
-
-displayLockWidth = 3.5;
-displayLockSpacing = 0.6;
-displayLockGrip = wallThickness + displayLockSpacing + displayBoardThickness;
-displayLockLead = 1.2 * displayLockGrip;
-
 sensorWidth = 10.8;
 sensorLength = 13.8;
 sensorArmLength = 10;
@@ -41,13 +19,53 @@ apertureWidth = 1.1;
 apertureSpacing = 2;
 apertureCount = 3;
 
+espBoardTotalLength = 55;
+espBoardPCBLength = 48.4 + 0.2;
+espBoardWidth = 28.2 + 0.4;
+espBoardThickness = 1.5 + 0.3;
+espAntennaSideClearance = 4;
+espPinHeaderWidth = 1.6;
+
+espMountMainGrip = 4;
+espMountGripThickness = 1.5;
+espMountCounterSupportWidth = espAntennaSideClearance - espPinHeaderWidth;
+espMountCounterLockGrip = 0.4;
+espMountCounterLockThickness = 0.6;
+espMountLift = verticalThickness + sensorLength + 10;
+
+displayWidth = 26;
+displayHeight = 14;
+displayBoardWidth = 27.5 + 0.8;
+displayBoardHeight = 28;
+displayBoardThickness = 1.2 + 0.4;
+displayTotalThickness = 3.8;
+
+displayTopOffset = 5;
+displayGrip = displayTopOffset * 0.8;
+displaySideGrip = 2.5;
+
+displayTopMargin = 10;
+displayBottomMargin = 12;
+
+displayLockWidth = 3.5;
+displayLockSpacing = 0.6;
+displayLockGrip = wallThickness + displayLockSpacing + displayBoardThickness;
+displayLockLead = 1.2 * displayLockGrip;
+displayLockTopOffset = 0.5;
+
+usbWidth = 8;
+usbHeight = 3;
+
 pinHeaderWidth = 10 + 1;
 
+espFrontMargin = 3 * wallThickness + displayTotalThickness + displayLockSpacing + 2;
+
 caseHeight = displayHeight + displayTopMargin + displayBottomMargin;
-caseWidth = boardWidth + 2 * wallThickness;
-caseDepth = boardDepth + 2 * wallThickness;
+caseWidth = espBoardTotalLength + 2 * wallThickness;
+caseDepth = espBoardWidth + espFrontMargin + 2 * wallThickness;
 
 apertureTotalWidth = apertureCount * apertureSpacing;
+espMountYOffset = caseDepth - espBoardWidth - wallThickness;
 
 module mainCase() {
     // ceiling
@@ -62,9 +80,15 @@ module mainCase() {
             translate([-wallThickness / 2, y, verticalThickness])
             cube([wallThickness * 2, apertureWidth, sensorLength / 2]);
         }
+        
+        translate([0, espMountYOffset + (espBoardWidth - usbWidth) / 2, espMountLift + espMountGripThickness - usbHeight])
+        cube([wallThickness, usbWidth, usbHeight]);
     }
     
     sensorMount();
+    
+    translate([wallThickness, espMountYOffset, 0])
+    espMount();
     
     // left
     translate([caseWidth - wallThickness, 0, 0])
@@ -178,7 +202,7 @@ module frontWall() {
 }
 
 module displayLock() {
-    lockHeight = displayTopMargin - displayTopOffset + displayBoardHeight;
+    lockHeight = displayTopMargin - displayTopOffset + displayBoardHeight + displayLockTopOffset;
     
     translate([displayLockWidth, 3 * wallThickness + displayTotalThickness + displayLockSpacing, 0])
     rotate([90, 0, -90])
@@ -190,6 +214,69 @@ module displayLock() {
       [wallThickness, lockHeight - displayLockLead],
       [wallThickness + displayLockGrip, lockHeight]
     ]);
+}
+
+module espMount() {
+    // main grip
+    translate([0, espBoardWidth - espMountMainGrip, espMountLift]) {
+        // lower
+        cube([espBoardPCBLength, wallThickness + espMountMainGrip, espMountGripThickness]);
+        
+        // connector between upper and lower
+        translate([0, espMountMainGrip, espMountGripThickness])
+        cube([espBoardPCBLength, wallThickness, espBoardThickness]);
+        
+        // right-hand side limiter
+        translate([espBoardPCBLength, 0, 0])
+        cube([wallThickness, espAntennaSideClearance + wallThickness, 2 * espMountGripThickness + espBoardThickness]);
+        
+        // left-hand side limiter
+        translate([-wallThickness, 0, 0])
+        cube([wallThickness, espAntennaSideClearance + wallThickness, 2 * espMountGripThickness + espBoardThickness]);
+        
+        // left lock
+        translate([0, 0, espMountGripThickness + espBoardThickness])
+        cube([espMountCounterLockGrip, espMountMainGrip, espMountCounterLockThickness]);
+        
+        // right lock
+        translate([espBoardPCBLength - espMountCounterLockGrip, 0, espMountGripThickness + espBoardThickness])
+        cube([espMountCounterLockGrip, espMountMainGrip, espMountCounterLockThickness]);
+    }
+    
+    // counter grip
+    translate([0, 0, espMountLift]) {
+        // right-hand side limiter
+        translate([espBoardPCBLength, 0, 0])
+        cube([wallThickness, espAntennaSideClearance + wallThickness, 2 * espMountGripThickness + espBoardThickness]);
+            
+        // left-hand side limiter
+        translate([-wallThickness, 0, 0])
+        cube([wallThickness, espAntennaSideClearance + wallThickness, 2 * espMountGripThickness + espBoardThickness]);
+        
+        // counter support
+        translate([0, espPinHeaderWidth, 0])
+        cube([espBoardPCBLength, espMountCounterSupportWidth, espMountGripThickness]);
+        
+        // counter side support
+        translate([0, -wallThickness, 0])
+        cube([espBoardPCBLength, wallThickness, espMountGripThickness + espBoardThickness]);
+        
+        // left lock
+        translate([0, espPinHeaderWidth, espMountGripThickness + espBoardThickness])
+        cube([espMountCounterLockGrip, espMountCounterSupportWidth, espMountCounterLockThickness]);
+        
+        // right lock
+        translate([espBoardPCBLength - espMountCounterLockGrip, espPinHeaderWidth, espMountGripThickness + espBoardThickness])
+        cube([espMountCounterLockGrip, espMountCounterSupportWidth, espMountCounterLockThickness]);
+    }
+    
+    // main stand-off
+    translate([espBoardPCBLength, espBoardWidth - espMountMainGrip, 0])
+    cube([wallThickness, wallThickness + espMountMainGrip, espMountLift]);
+    
+    // counter stand-off
+    translate([espBoardPCBLength, -wallThickness, 0])
+    cube([wallThickness, espAntennaSideClearance + 2 * wallThickness, espMountLift + espBoardThickness + espMountGripThickness]);
 }
 
 module bottomCap() {
