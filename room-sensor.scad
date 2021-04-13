@@ -1,7 +1,9 @@
+// This model currently has problems slicing in Prusa Slicer
+// Fix: Import in MeshLab, Merge Close Vertices (< 0.01 mm)
+//      (fixing non-manifold vertices does not seem to help)
+
 wallThickness = 1.35;
 verticalThickness = 1.2;
-
-tolerance = 0.1;
 
 sensorWidth = 10.8;
 sensorLength = 13.8;
@@ -19,19 +21,18 @@ apertureWidth = 1.1;
 apertureSpacing = 2;
 apertureCount = 3;
 
-espBoardTotalLength = 55;
-espBoardPCBLength = 48.4 + 0.2;
+espBoardTotalLength = 54.6 + 1;
+espBoardPCBLength = 48.4 + 0.4;
 espBoardWidth = 28.2 + 0.4;
 espBoardThickness = 1.5 + 0.3;
 espAntennaSideClearance = 4;
-espPinHeaderWidth = 1.6;
+espPinHeaderWidth = 2.6 + 0.1;
 
 espMountMainGrip = 4;
 espMountGripThickness = 1.5;
 espMountCounterSupportWidth = espAntennaSideClearance - espPinHeaderWidth;
-espMountCounterLockGrip = 0.4;
-espMountCounterLockThickness = 0.6;
-espMountLift = verticalThickness + sensorLength + 10;
+espMountLockGrip = 0.4;
+espMountLockThickness = 0.6;
 
 displayWidth = 26;
 displayHeight = 14;
@@ -54,7 +55,14 @@ displayLockLead = 1.2 * displayLockGrip;
 displayLockTopOffset = 0.5;
 
 usbWidth = 8;
-usbHeight = 3;
+usbHeight = 2.7;
+usbZOffset = 0.3;
+
+capTolerance = 0.1;
+capRailOffset = 1;
+capLockWidth = 4;
+capLockLength = 2;
+capLockHeight = capTolerance * 2;
 
 pinHeaderWidth = 10 + 1;
 
@@ -66,6 +74,8 @@ caseDepth = espBoardWidth + espFrontMargin + 2 * wallThickness;
 
 apertureTotalWidth = apertureCount * apertureSpacing;
 espMountYOffset = caseDepth - espBoardWidth - wallThickness;
+// espMountLift = verticalThickness + sensorLength + 10;
+espMountLift = caseHeight - 2 * verticalThickness - 2 * espBoardThickness - espMountGripThickness - espMountLockThickness;
 
 module mainCase() {
     // ceiling
@@ -73,7 +83,7 @@ module mainCase() {
     
     // right
     difference() {
-        cube([wallThickness, caseDepth, caseHeight]);
+        cube([wallThickness, caseDepth, caseHeight - verticalThickness]);
         
         translate([0, caseDepth - wallThickness - apertureTotalWidth + apertureWidth / 2, 0])
         for(y = [0:apertureSpacing:apertureTotalWidth - 0.001]) {
@@ -81,7 +91,7 @@ module mainCase() {
             cube([wallThickness * 2, apertureWidth, sensorLength / 2]);
         }
         
-        translate([0, espMountYOffset + (espBoardWidth - usbWidth) / 2, espMountLift + espMountGripThickness - usbHeight])
+        translate([0, espMountYOffset + (espBoardWidth - usbWidth) / 2, espMountLift + espMountGripThickness - usbHeight + usbZOffset])
         cube([wallThickness, usbWidth, usbHeight]);
     }
     
@@ -107,6 +117,26 @@ module mainCase() {
             translate([x, -wallThickness / 2, verticalThickness])
             cube([apertureWidth, wallThickness * 2, sensorLength / 2]);
         }
+    }
+    
+    // front rail
+    translate([0, wallThickness, caseHeight - verticalThickness]) {
+        capRail(caseWidth);
+        translate([0, 0, -verticalThickness]) capRail(caseWidth);
+    }
+    
+    // back rail
+    translate([0, caseDepth - wallThickness, caseHeight - verticalThickness])
+    scale([1, -1, 1]) {
+        capRail(caseWidth);
+        translate([0, 0, -verticalThickness]) capRail(caseWidth);
+    }
+    
+    // left rail
+    translate([caseWidth - wallThickness, 0, caseHeight - verticalThickness])
+    rotate(90) {
+        capRail(caseDepth);
+        translate([0, 0, -verticalThickness]) capRail(caseDepth);
     }
 }
 
@@ -236,11 +266,11 @@ module espMount() {
         
         // left lock
         translate([0, 0, espMountGripThickness + espBoardThickness])
-        cube([espMountCounterLockGrip, espMountMainGrip, espMountCounterLockThickness]);
+        cube([espMountLockGrip, espMountMainGrip, espMountLockThickness]);
         
         // right lock
-        translate([espBoardPCBLength - espMountCounterLockGrip, 0, espMountGripThickness + espBoardThickness])
-        cube([espMountCounterLockGrip, espMountMainGrip, espMountCounterLockThickness]);
+        translate([espBoardPCBLength - espMountLockGrip, 0, espMountGripThickness + espBoardThickness])
+        cube([espMountLockGrip, espMountMainGrip, espMountLockThickness]);
     }
     
     // counter grip
@@ -263,11 +293,11 @@ module espMount() {
         
         // left lock
         translate([0, espPinHeaderWidth, espMountGripThickness + espBoardThickness])
-        cube([espMountCounterLockGrip, espMountCounterSupportWidth, espMountCounterLockThickness]);
+        cube([espMountLockGrip, espMountCounterSupportWidth, espMountLockThickness]);
         
         // right lock
-        translate([espBoardPCBLength - espMountCounterLockGrip, espPinHeaderWidth, espMountGripThickness + espBoardThickness])
-        cube([espMountCounterLockGrip, espMountCounterSupportWidth, espMountCounterLockThickness]);
+        translate([espBoardPCBLength - espMountLockGrip, espPinHeaderWidth, espMountGripThickness + espBoardThickness])
+        cube([espMountLockGrip, espMountCounterSupportWidth, espMountLockThickness]);
     }
     
     // main stand-off
@@ -279,8 +309,30 @@ module espMount() {
     cube([wallThickness, espAntennaSideClearance + 2 * wallThickness, espMountLift + espBoardThickness + espMountGripThickness]);
 }
 
+module capRail(length) {
+    rotate([90, 0, 90])
+    linear_extrude(length)
+    polygon([
+        [0, verticalThickness],
+        [0, 0],
+        [capRailOffset, verticalThickness],
+        
+    ]);
+}
+
 module bottomCap() {
-    cube([caseWidth - 2 * (wallThickness + tolerance), caseDepth - 2 * (wallThickness + tolerance), verticalThickness]);
+    topWidth = caseDepth - 2 * (wallThickness + capTolerance);
+    topLength = caseWidth - (wallThickness + capTolerance);
+    hull() {
+        translate([0, 0, verticalThickness - 0.01])
+        cube([topLength, topWidth, 0.01]);
+        
+        translate([capRailOffset, capRailOffset, 0])
+        cube([topLength - capRailOffset, topWidth - 2 * capRailOffset, 0.01]);
+    }
+    
+    translate([topLength - capLockLength - wallThickness - capTolerance, (topWidth - capLockWidth) / 2, verticalThickness])
+    cube([capLockLength, capLockWidth, capLockHeight]);
 }
 
 module testAssembly() {
@@ -290,12 +342,13 @@ module testAssembly() {
             rotate([0, 180, 0])
             mainCase();
             
-            translate([wallThickness + tolerance, wallThickness + tolerance, 0])
+            translate([wallThickness + capTolerance, wallThickness + capTolerance, -capTolerance / 2])
             bottomCap();
         }
         
+        translate([caseWidth / 2, 0, 0])
         cube([caseWidth / 2, caseDepth, caseHeight]);
     }
 }
 
-mainCase();
+espMount();
