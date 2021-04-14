@@ -17,7 +17,7 @@ apertureWidth = 1.1;
 apertureSpacing = 2;
 apertureCount = 3;
 
-espBoardTotalLength = 54.6 + 1;
+espBoardTotalLength = 54.6 + 5;
 espBoardPCBLength = 48.4 + 0.4;
 espBoardWidth = 28.2 + 0.4;
 espBoardThickness = 1.5 + 0.3;
@@ -57,11 +57,11 @@ usbWidth = 8;
 usbHeight = 2.7;
 usbZOffset = 0.3;
 
-capTolerance = 0.1;
+capTolerance = 0.2;
 capRailOffset = 1;
 capLockWidth = 4;
 capLockLength = 2;
-capLockHeight = capTolerance * 2;
+capLockHeight = 0.6;
 
 pinHeaderWidth = 10 + 1;
 
@@ -354,7 +354,7 @@ module bottomCap() {
         cube([topLength - capRailOffset, topWidth - 2 * capRailOffset, 0.01]);
     }
     
-    translate([topLength - capLockLength - wallThickness - capTolerance, (topWidth - capLockWidth) / 2, verticalThickness])
+    translate([topLength - capLockLength - wallThickness - 2 * capTolerance, (topWidth - capLockWidth) / 2, verticalThickness])
     cube([capLockLength, capLockWidth, capLockHeight]);
 }
 
