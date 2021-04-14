@@ -1,8 +1,4 @@
-// This model currently has problems slicing in Prusa Slicer
-// Fix: Import in MeshLab, Merge Close Vertices (< 0.01 mm)
-//      (fixing non-manifold vertices does not seem to help)
-
-wallThickness = 1.35;
+wallThickness = 1.5;
 verticalThickness = 1.2;
 
 sensorWidth = 10.8;
@@ -33,6 +29,9 @@ espMountGripThickness = 1.5;
 espMountCounterSupportWidth = espAntennaSideClearance - espPinHeaderWidth;
 espMountLockGrip = 0.4;
 espMountLockThickness = 0.6;
+espMountCushionHeight = 5;
+espMountCushionWidth = 4;
+espMountPillarThickness = 2.4;
 
 displayWidth = 26;
 displayHeight = 14;
@@ -66,7 +65,7 @@ capLockHeight = capTolerance * 2;
 
 pinHeaderWidth = 10 + 1;
 
-espFrontMargin = 3 * wallThickness + displayTotalThickness + displayLockSpacing + 2;
+espFrontMargin = 3 * wallThickness + displayTotalThickness + displayLockSpacing + 4;
 
 caseHeight = displayHeight + displayTopMargin + displayBottomMargin;
 caseWidth = espBoardTotalLength + 2 * wallThickness;
@@ -74,7 +73,6 @@ caseDepth = espBoardWidth + espFrontMargin + 2 * wallThickness;
 
 apertureTotalWidth = apertureCount * apertureSpacing;
 espMountYOffset = caseDepth - espBoardWidth - wallThickness;
-// espMountLift = verticalThickness + sensorLength + 10;
 espMountLift = caseHeight - 2 * verticalThickness - 2 * espBoardThickness - espMountGripThickness - espMountLockThickness;
 
 module mainCase() {
@@ -252,17 +250,14 @@ module espMount() {
         // lower
         cube([espBoardPCBLength, wallThickness + espMountMainGrip, espMountGripThickness]);
         
-        // connector between upper and lower
+        // middle cushion to support lower from wall
+        translate([(espBoardPCBLength - wallThickness) / 2, espMountMainGrip, -espMountCushionHeight])
+        scale([1, -1, 1])
+        cushion(wallThickness, espMountCushionHeight, espMountMainGrip);
+        
+        // main support
         translate([0, espMountMainGrip, espMountGripThickness])
         cube([espBoardPCBLength, wallThickness, espBoardThickness]);
-        
-        // right-hand side limiter
-        translate([espBoardPCBLength, 0, 0])
-        cube([wallThickness, espAntennaSideClearance + wallThickness, 2 * espMountGripThickness + espBoardThickness]);
-        
-        // left-hand side limiter
-        translate([-wallThickness, 0, 0])
-        cube([wallThickness, espAntennaSideClearance + wallThickness, 2 * espMountGripThickness + espBoardThickness]);
         
         // left lock
         translate([0, 0, espMountGripThickness + espBoardThickness])
@@ -275,21 +270,35 @@ module espMount() {
     
     // counter grip
     translate([0, 0, espMountLift]) {
-        // right-hand side limiter
-        translate([espBoardPCBLength, 0, 0])
-        cube([wallThickness, espAntennaSideClearance + wallThickness, 2 * espMountGripThickness + espBoardThickness]);
-            
-        // left-hand side limiter
-        translate([-wallThickness, 0, 0])
-        cube([wallThickness, espAntennaSideClearance + wallThickness, 2 * espMountGripThickness + espBoardThickness]);
-        
         // counter support
-        translate([0, espPinHeaderWidth, 0])
-        cube([espBoardPCBLength, espMountCounterSupportWidth, espMountGripThickness]);
+        translate([0, espPinHeaderWidth, 0]) {
+            cube([espBoardPCBLength, espMountCounterSupportWidth, espMountGripThickness]);
+            
+            // left cushion
+            translate([0, espMountCounterSupportWidth, -espMountCushionHeight])
+            rotate([0, 0, -90])
+            cushion(espMountCounterSupportWidth, espMountCushionHeight, espMountCushionWidth);
+            
+            // right cushion
+            translate([espBoardPCBLength, 0, -espMountCushionHeight])
+            rotate([0, 0, 90])
+            cushion(espMountCounterSupportWidth, espMountCushionHeight, espMountCushionWidth);
+        }
         
         // counter side support
-        translate([0, -wallThickness, 0])
-        cube([espBoardPCBLength, wallThickness, espMountGripThickness + espBoardThickness]);
+        translate([0, -wallThickness, 0]) {
+            cube([espBoardPCBLength, wallThickness, espMountGripThickness + espBoardThickness]);
+            
+            // left cushion
+            translate([0, wallThickness, -espMountCushionHeight])
+            rotate([0, 0, -90])
+            cushion(wallThickness, espMountCushionHeight, espMountCushionWidth);
+            
+            // right cushion
+            translate([espBoardPCBLength, 0, -espMountCushionHeight])
+            rotate([0, 0, 90])
+            cushion(wallThickness, espMountCushionHeight, espMountCushionWidth);
+        }
         
         // left lock
         translate([0, espPinHeaderWidth, espMountGripThickness + espBoardThickness])
@@ -302,20 +311,34 @@ module espMount() {
     
     // main stand-off
     translate([espBoardPCBLength, espBoardWidth - espMountMainGrip, 0])
-    cube([wallThickness, wallThickness + espMountMainGrip, espMountLift]);
+    cube([espMountPillarThickness, wallThickness + espMountMainGrip, espMountLift + espBoardThickness + 2 * espMountGripThickness]);
     
     // counter stand-off
     translate([espBoardPCBLength, -wallThickness, 0])
-    cube([wallThickness, espAntennaSideClearance + 2 * wallThickness, espMountLift + espBoardThickness + espMountGripThickness]);
+    cube([espMountPillarThickness, espAntennaSideClearance + wallThickness, espMountLift + espBoardThickness + 2 * espMountGripThickness]);
+    
+    // counter side center stand-off
+    // aligning with display lock to avoid blocking cable flow
+    translate([(caseWidth - displayBoardWidth) / 2, -wallThickness, 0])
+    cube([espMountPillarThickness, wallThickness, espMountLift]);
+    
+    // counter lower center stand-off
+    // aligning with display lock to avoid blocking cable flow
+    translate([(caseWidth - displayBoardWidth) / 2, espPinHeaderWidth, 0])
+    cube([espMountPillarThickness, espMountCounterSupportWidth, espMountLift]);
 }
 
 module capRail(length) {
+    cushion(length, verticalThickness, capRailOffset);
+}
+
+module cushion(thickness, height, width) {
     rotate([90, 0, 90])
-    linear_extrude(length)
+    linear_extrude(thickness)
     polygon([
-        [0, verticalThickness],
+        [0, height],
         [0, 0],
-        [capRailOffset, verticalThickness],
+        [width, height],
         
     ]);
 }
@@ -351,4 +374,4 @@ module testAssembly() {
     }
 }
 
-espMount();
+mainCase();
