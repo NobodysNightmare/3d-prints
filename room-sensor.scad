@@ -1,5 +1,6 @@
+layerHeight = 0.3;
 wallThickness = 1.5;
-verticalThickness = 1.2;
+verticalThickness = 4 * layerHeight;
 
 sensorWidth = 10.8;
 sensorLength = 13.8;
@@ -25,10 +26,10 @@ espAntennaSideClearance = 4;
 espPinHeaderWidth = 2.6 + 0.1;
 
 espMountMainGrip = 4;
-espMountGripThickness = 1.5;
+espMountGripThickness = 5 * layerHeight;
 espMountCounterSupportWidth = espAntennaSideClearance - espPinHeaderWidth;
 espMountLockGrip = 0.4;
-espMountLockThickness = 0.6;
+espMountLockThickness = 2 * layerHeight;
 espMountCushionHeight = 5;
 espMountCushionWidth = 4;
 espMountPillarThickness = 2.4;
@@ -65,14 +66,14 @@ capLockHeight = 0.6;
 
 pinHeaderWidth = 10 + 1;
 
-espFrontMargin = 3 * wallThickness + displayTotalThickness + displayLockSpacing + 4;
+espFrontMargin = 3 * wallThickness + displayTotalThickness + displayLockSpacing + 3;
 
 caseHeight = displayHeight + displayTopMargin + displayBottomMargin;
 caseWidth = espBoardTotalLength + 2 * wallThickness;
-caseDepth = espBoardWidth + espFrontMargin + 2 * wallThickness;
+caseDepth = espBoardWidth + espFrontMargin + 4 * wallThickness;
 
 apertureTotalWidth = apertureCount * apertureSpacing;
-espMountYOffset = caseDepth - espBoardWidth - wallThickness;
+espMountYOffset = caseDepth - espBoardWidth - 2 * wallThickness;
 espMountLift = caseHeight - 2 * verticalThickness - 2 * espBoardThickness - espMountGripThickness - espMountLockThickness;
 
 module mainCase() {
@@ -90,7 +91,7 @@ module mainCase() {
         }
         
         translate([0, espMountYOffset + (espBoardWidth - usbWidth) / 2, espMountLift + espMountGripThickness - usbHeight + usbZOffset])
-        cube([wallThickness, usbWidth, usbHeight]);
+        cube([wallThickness + 0.1, usbWidth, usbHeight]);
     }
     
     sensorMount();
@@ -251,9 +252,9 @@ module espMount() {
         cube([espBoardPCBLength, wallThickness + espMountMainGrip, espMountGripThickness]);
         
         // middle cushion to support lower from wall
-        translate([(espBoardPCBLength - wallThickness) / 2, espMountMainGrip, -espMountCushionHeight])
+        translate([(espBoardPCBLength - wallThickness) / 2, espMountMainGrip + wallThickness, -espMountCushionHeight])
         scale([1, -1, 1])
-        cushion(wallThickness, espMountCushionHeight, espMountMainGrip);
+        cushion(wallThickness, espMountCushionHeight, wallThickness + espMountMainGrip);
         
         // main support
         translate([0, espMountMainGrip, espMountGripThickness])
@@ -317,6 +318,11 @@ module espMount() {
     translate([espBoardPCBLength, -wallThickness, 0])
     cube([espMountPillarThickness, espAntennaSideClearance + wallThickness, espMountLift + espBoardThickness + 2 * espMountGripThickness]);
     
+    // helper for printing, avoiding that the pillar bends over due to
+    // the long bridge of the main mount
+    translate([espBoardPCBLength + espMountPillarThickness, 0, espMountLift - espMountCushionHeight / 2])
+    cube([caseWidth - espBoardPCBLength - espMountPillarThickness - 2 * wallThickness, wallThickness, 2 * layerHeight]);
+    
     // counter side center stand-off
     // aligning with display lock to avoid blocking cable flow
     translate([(caseWidth - displayBoardWidth) / 2, -wallThickness, 0])
@@ -374,4 +380,4 @@ module testAssembly() {
     }
 }
 
-mainCase();
+bottomCap();
