@@ -14,12 +14,19 @@ sensorLockLead = 1.2;
 sensorLockGrip = 0.6;
 sensorLockSpacing = 0.4;
 
+isolationWallThickness = 6;
+isolationWallOpeningWidth = 5;
+isolationWallOpeningHeight = 11;
+isolationWallInnerWall = 0.5;
+isolatedSensorSpaceInnerWidth = 20;
+isolatedSensorSpaceTotalWidth = isolationWallThickness + isolatedSensorSpaceInnerWidth;
+
 apertureWidth = 1.1;
 apertureSpacing = 2;
 apertureCount = 3;
 
 espBoardTotalLength = 54.6 + 5;
-espBoardPCBLength = 48.4 + 0.4;
+espBoardPCBLength = 48.4 + 0.6;
 espBoardWidth = 28.2 + 0.4;
 espBoardThickness = 1.5 + 0.3;
 espAntennaSideClearance = 4;
@@ -33,6 +40,8 @@ espMountLockThickness = 2 * layerHeight;
 espMountCushionHeight = 5;
 espMountCushionWidth = 4;
 espMountPillarThickness = 2.4;
+
+ventilationHeight = 2.4;
 
 displayWidth = 26;
 displayHeight = 14;
@@ -69,12 +78,14 @@ pinHeaderWidth = 10 + 1;
 espFrontMargin = 3 * wallThickness + displayTotalThickness + displayLockSpacing + 3;
 
 caseHeight = displayHeight + displayTopMargin + displayBottomMargin;
-caseWidth = espBoardTotalLength + 2 * wallThickness;
+caseWidth = espBoardTotalLength + 2 * wallThickness + isolatedSensorSpaceTotalWidth;
 caseDepth = espBoardWidth + espFrontMargin + 4 * wallThickness;
 
 apertureTotalWidth = apertureCount * apertureSpacing;
 espMountYOffset = caseDepth - espBoardWidth - 2 * wallThickness;
 espMountLift = caseHeight - 2 * verticalThickness - 2 * espBoardThickness - espMountGripThickness - espMountLockThickness;
+
+bottomVentilationZOffset = caseHeight - 2 * verticalThickness - ventilationHeight;
 
 module mainCase() {
     // ceiling
@@ -84,16 +95,15 @@ module mainCase() {
     difference() {
         cube([wallThickness, caseDepth, caseHeight - verticalThickness]);
         
-        translate([0, caseDepth - wallThickness - apertureTotalWidth + apertureWidth / 2, 0])
-        for(y = [0:apertureSpacing:apertureTotalWidth - 0.001]) {
-            translate([-wallThickness / 2, y, verticalThickness])
-            cube([wallThickness * 2, apertureWidth, sensorLength / 2]);
-        }
-        
         translate([0, espMountYOffset + (espBoardWidth - usbWidth) / 2, espMountLift + espMountGripThickness - usbHeight + usbZOffset])
         cube([wallThickness + 0.1, usbWidth, usbHeight]);
     }
     
+    translate([espBoardTotalLength + wallThickness, 0, 0])
+    isolatedSensorSpace();
+    
+    translate([caseWidth, 0, 0])
+    scale([-1, 1, 1])
     sensorMount();
     
     translate([wallThickness, espMountYOffset, 0])
@@ -101,7 +111,13 @@ module mainCase() {
     
     // left
     translate([caseWidth - wallThickness, 0, 0])
-    cube([wallThickness, caseDepth, caseHeight]);
+    difference() {
+        cube([wallThickness, caseDepth, caseHeight]);
+        
+        translate([0, caseDepth - wallThickness - apertureWidth / 2, verticalThickness])
+        rotate([0, 0, -90])
+        ventilationSlots(apertureTotalWidth, sensorLength / 2);
+    }
     
     // front
     frontWall();
@@ -111,11 +127,17 @@ module mainCase() {
     difference() {
         cube([caseWidth, wallThickness, caseHeight]);
         
-        translate([wallThickness + apertureWidth / 2, 0, 0])
-        for(x = [0:apertureSpacing:apertureTotalWidth - 0.001]) {
-            translate([x, -wallThickness / 2, verticalThickness])
-            cube([apertureWidth, wallThickness * 2, sensorLength / 2]);
-        }
+        translate([caseWidth - apertureTotalWidth - apertureWidth / 2, 0, verticalThickness])
+        ventilationSlots(apertureTotalWidth, sensorLength / 2);
+        
+        translate([espBoardPCBLength / 2, 0, bottomVentilationZOffset])
+        ventilationSlots(espBoardPCBLength / 2, ventilationHeight);
+        
+        translate([espBoardPCBLength / 2, 0, verticalThickness])
+        ventilationSlots(espBoardPCBLength / 2, ventilationHeight);
+        
+        translate([caseWidth - isolatedSensorSpaceInnerWidth, 0, bottomVentilationZOffset])
+        ventilationSlots(isolatedSensorSpaceInnerWidth - 2 * wallThickness, ventilationHeight);
     }
     
     // front rail
@@ -263,10 +285,6 @@ module espMount() {
         // left lock
         translate([0, 0, espMountGripThickness + espBoardThickness])
         cube([espMountLockGrip, espMountMainGrip, espMountLockThickness]);
-        
-        // right lock
-        translate([espBoardPCBLength - espMountLockGrip, 0, espMountGripThickness + espBoardThickness])
-        cube([espMountLockGrip, espMountMainGrip, espMountLockThickness]);
     }
     
     // counter grip
@@ -304,10 +322,6 @@ module espMount() {
         // left lock
         translate([0, espPinHeaderWidth, espMountGripThickness + espBoardThickness])
         cube([espMountLockGrip, espMountCounterSupportWidth, espMountLockThickness]);
-        
-        // right lock
-        translate([espBoardPCBLength - espMountLockGrip, espPinHeaderWidth, espMountGripThickness + espBoardThickness])
-        cube([espMountLockGrip, espMountCounterSupportWidth, espMountLockThickness]);
     }
     
     // main stand-off
@@ -321,7 +335,7 @@ module espMount() {
     // helper for printing, avoiding that the pillar bends over due to
     // the long bridge of the main mount
     translate([espBoardPCBLength + espMountPillarThickness, 0, espMountLift - espMountCushionHeight / 2])
-    cube([caseWidth - espBoardPCBLength - espMountPillarThickness - 2 * wallThickness, wallThickness, 2 * layerHeight]);
+    cube([espBoardTotalLength - espBoardPCBLength - espMountPillarThickness, wallThickness, 2 * layerHeight]);
     
     // counter side center stand-off
     // aligning with display lock to avoid blocking cable flow
@@ -332,6 +346,47 @@ module espMount() {
     // aligning with display lock to avoid blocking cable flow
     translate([(caseWidth - displayBoardWidth) / 2, espPinHeaderWidth, 0])
     cube([espMountPillarThickness, espMountCounterSupportWidth, espMountLift]);
+}
+
+module isolatedSensorSpace() {
+    difference() {
+        union() {
+            cube([wallThickness, caseDepth, caseHeight - verticalThickness]);
+            
+            translate([(isolationWallThickness - isolationWallInnerWall) / 2, 0, 0])
+            cube([isolationWallInnerWall, caseDepth, caseHeight - verticalThickness]);
+            
+            translate([isolationWallThickness - wallThickness, 0, 0])
+            cube([wallThickness, caseDepth, caseHeight - verticalThickness]);
+            
+            translate([0, 0, caseHeight - verticalThickness - 2 * layerHeight])
+            cube([isolationWallThickness, caseDepth, 2 * layerHeight]);
+
+            // walls around opening
+            intersection() {
+                minkowski() {
+                    isolationWallOpeningCube();
+                    cube([1, wallThickness * 2, verticalThickness + 2 * layerHeight], center = true);
+                }
+                
+                cube([isolationWallThickness, caseDepth, caseHeight - verticalThickness]);
+            }
+        }
+        
+        isolationWallOpeningCube();
+    }
+}
+
+module isolationWallOpeningCube() {
+    translate([0, caseDepth - espBoardWidth - 2 * wallThickness - isolationWallOpeningWidth, caseHeight - isolationWallOpeningHeight - verticalThickness - 2 * layerHeight])
+        cube([isolationWallThickness, isolationWallOpeningWidth, isolationWallOpeningHeight]);
+}
+
+module ventilationSlots(width, height) {
+    for(x = [0:apertureSpacing:width - 0.001]) {
+        translate([x, -wallThickness / 2, 0])
+        cube([apertureWidth, wallThickness * 2, height]);
+    }
 }
 
 module capRail(length) {
@@ -375,9 +430,9 @@ module testAssembly() {
             bottomCap();
         }
         
-        translate([caseWidth / 2, 0, 0])
-        cube([caseWidth / 2, caseDepth, caseHeight]);
+        translate([0, 0, 0])
+        cube([caseWidth, caseDepth / 2, caseHeight]);
     }
 }
 
-bottomCap();
+mainCase();
