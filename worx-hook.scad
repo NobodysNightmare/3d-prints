@@ -19,7 +19,6 @@ module hook() {
 }
 
 module pointyEnd() {
-    // TODO: fix the pointy part of the pointy end
     difference() {
         union() {
             pointyPiece();
