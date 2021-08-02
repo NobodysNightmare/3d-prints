@@ -18,7 +18,7 @@ isolationWallThickness = 6;
 isolationWallOpeningWidth = 5;
 isolationWallOpeningHeight = 11;
 isolationWallInnerWall = 0.5;
-isolatedSensorSpaceInnerWidth = 20;
+isolatedSensorSpaceInnerWidth = 21.5;
 isolatedSensorSpaceTotalWidth = isolationWallThickness + isolatedSensorSpaceInnerWidth;
 
 apertureWidth = 1.1;
@@ -168,7 +168,7 @@ module sensorMount() {
         // TODO: I should've been able to properly calculate
         // this based on sensor dimensions
         color("red")
-        translate([6, caseDepth - 6, verticalThickness])
+        translate([6.5, caseDepth - 6.5, verticalThickness])
         rotate([0, 0, 45])
         translate([-wallThickness - sensorWidth / 2, -wallThickness - sensorThickness / 2, 0]) {
             translate([wallThickness, 2 * wallThickness + sensorThickness, sensorLength / 2])
@@ -339,12 +339,12 @@ module espMount() {
     
     // counter side center stand-off
     // aligning with display lock to avoid blocking cable flow
-    translate([(caseWidth - displayBoardWidth) / 2, -wallThickness, 0])
+    translate([espBoardPCBLength / 2, -wallThickness, 0])
     cube([espMountPillarThickness, wallThickness, espMountLift]);
     
     // counter lower center stand-off
     // aligning with display lock to avoid blocking cable flow
-    translate([(caseWidth - displayBoardWidth) / 2, espPinHeaderWidth, 0])
+    translate([espBoardPCBLength / 2, espPinHeaderWidth, 0])
     cube([espMountPillarThickness, espMountCounterSupportWidth, espMountLift]);
 }
 
