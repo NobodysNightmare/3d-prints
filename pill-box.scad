@@ -87,7 +87,7 @@ module cover() {
     
     translate([0, 0, verticalThickness])
     rotate([0, 0, floor(len(slotLabels) / 2) * slotAngle])
-    linear_extrude(layerHeight)
+    linear_extrude(2 * layerHeight)
     offset(-radialTolerance)
     slot();
     
@@ -129,6 +129,12 @@ module shaft() {
         
         translate([-shaftBendGap / 2, -shaftOpenRadius, 0])
         cube([shaftBendGap, shaftOpenRadius * 2, height]);
+        
+        translate([-shaftGripRadius, shaftRadius - radialTolerance, shaftLength])
+        cube([2 * shaftGripRadius, shaftGripRadius, shaftGripHeight * 3]);
+        
+        translate([-shaftGripRadius, -shaftGripRadius - shaftRadius + radialTolerance, shaftLength])
+        cube([2 * shaftGripRadius, shaftGripRadius, shaftGripHeight * 3]);
     }
 }
 
@@ -137,12 +143,12 @@ module testAssembly() {
         union() {
             mainBody();
             
-            translate([0, 0, height + verticalThickness + verticalTolerance / 2])
+            translate([0, 0, height + verticalThickness + verticalTolerance])
             rotate([180, 0, 0])
             cover();
         }
         
-        rotate([0, 0, slotAngle / 2])
+        rotate([0, 0, -1 * slotAngle + slotAngle / 2])
         translate([-1.5 * totalRadius, 0, 0])
         cube([3 * totalRadius, 2 * totalRadius, 2 * height]);
     }
