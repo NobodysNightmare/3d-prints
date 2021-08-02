@@ -17,6 +17,13 @@ gripFrontWiggle = 0.1;
 gripSideWiggle = 0.3;
 gripOffset = 10;
 
+hookWidth = 6;
+hookThickness = 2;
+hookGripOpening = 1.8;
+hookGripHeight = 30.2;
+hookHoldOpening = 8;
+hookHoldHeight = 5;
+
 $fa = $preview ? 2 : 0.4;
 $fs = $preview ? 2 : 0.4;
 
@@ -114,6 +121,27 @@ module showerPlate() {
     plateHolder();
 }
 
+module hook() {
+    linear_extrude(hookWidth) {
+        square([hookThickness, 2 * hookThickness + hookGripHeight + hookHoldHeight]);
+        
+        translate([-hookThickness - hookHoldOpening, 0])
+        square([hookThickness, hookThickness + hookHoldHeight]);
+        
+        translate([-hookHoldOpening, 0])
+        square([hookHoldOpening, hookThickness]);
+        
+        translate([hookThickness + hookGripOpening, hookHoldHeight + hookThickness])
+        square([hookThickness, hookThickness + hookGripHeight]);
+        
+        translate([hookThickness, hookHoldHeight + hookGripHeight + hookThickness])
+        square([hookGripOpening, hookThickness]);
+        
+        translate([hookThickness + hookGripOpening / 2, hookHoldHeight])
+        square([hookGripOpening / 2 + hookThickness, hookThickness]);
+    }
+}
+
 module testAssembly() {
     translate([-plateGrillWidth, 0, 0]) {
         showerPlate();
@@ -124,4 +152,4 @@ module testAssembly() {
     }
 }
 
-showerPlate();
+hook();
