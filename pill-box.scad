@@ -1,8 +1,23 @@
+// Export separate STL files from rendering
+// the following two modules:
+//     cover();
+//     mainBody();
+
+//Text printed on top of the cover (e.g. your name)
+coverText = "Pills";
+
+// Text printed inside the slots/trays (current german weekdays)
+// Number of slots will adapt to the size of this array
+slotLabels = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So", "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+
+// Radius and height have the main influence
+// on the storage capacity.
+totalRadius = 45;
+height = 12;
+
 layerHeight = 0.3;
 
-totalRadius = 45;
 shaftRadius = 6;
-height = 12;
 
 textPadding = 1;
 
@@ -12,15 +27,12 @@ shaftGripRadius = 7;
 shaftGripHeight = 1;
 shaftBendGap = 2.5 * (shaftGripRadius - shaftRadius);
 
-coverText = "Pill Box";
-
 verticalThickness = 1.2;
 wallThickness = 1.2;
 slotRoundness = 2;
 radialTolerance = 0.2;
 verticalTolerance = 0.2;
 
-slotLabels = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So", "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 slotAngle = 360 / len(slotLabels);
 
 testRendering = false;
@@ -35,28 +47,28 @@ module mainBody() {
             linear_extrude(height)
             difference() {
                 circle(totalRadius);
-                
+
                 for(angle = [0:slotAngle:360]) {
                     rotate([0, 0, angle])
                     slot();
                 }
-                
+
                 circle(shaftRadius + radialTolerance);
             }
-            
+
             linear_extrude(verticalThickness)
             difference() {
                 circle(totalRadius);
                 circle(shaftRadius + radialTolerance);
             }
         }
-        
+
         translate([0, 0, height - shaftLength - shaftGripHeight + verticalTolerance])
         cylinder(shaftGripHeight, shaftOpenRadius, shaftRadius + radialTolerance);
-        
+
         linear_extrude(height - shaftLength - shaftGripHeight + verticalTolerance)
         circle(shaftOpenRadius);
-        
+
         for(i = [0:len(slotLabels) - 1]) {
             rotate([0, 0, i * slotAngle + slotAngle / 2])
             translate([totalRadius - wallThickness - textPadding, 0, verticalThickness - layerHeight])
@@ -70,27 +82,27 @@ module cover() {
     difference() {
         linear_extrude(verticalThickness + coverOverlap)
         circle(totalRadius + radialTolerance + wallThickness);
-        
+
         translate([0, 0, verticalThickness])
         linear_extrude(verticalThickness + coverOverlap)
         circle(totalRadius + radialTolerance);
-        
+
         linear_extrude(verticalThickness + verticalTolerance)
         slot();
-        
+
         rotate([0, 0, 90 + slotAngle / 2])
         translate([0, totalRadius / 2, 0])
         linear_extrude(2 * layerHeight)
         scale([-1, 1])
         text(coverText, size = 12, font = "Deja Vu Sans", halign = "center", valign = "center");
     }
-    
+
     translate([0, 0, verticalThickness])
     rotate([0, 0, floor(len(slotLabels) / 2) * slotAngle])
     linear_extrude(2 * layerHeight)
     offset(-radialTolerance)
     slot();
-    
+
     translate([0, 0, verticalThickness])
     shaft();
 }
@@ -105,10 +117,10 @@ module slot() {
                 [2 * totalRadius, 0],
                 [cos(slotAngle) * 2 * totalRadius, sin(slotAngle) * 2 * totalRadius]
             ]);
-            
+
             circle(totalRadius - wallThickness);
         };
-        
+
         circle(shaftOpenRadius + wallThickness);
     }
 }
@@ -117,22 +129,22 @@ module shaft() {
     difference() {
         union() {
             cylinder(shaftLength, r = shaftRadius);
-            
+
             translate([0, 0, shaftLength])
             cylinder(shaftGripHeight, shaftRadius, shaftGripRadius);
-            
+
             translate([0, 0, shaftLength + shaftGripHeight])
             cylinder(2 * shaftGripHeight, shaftGripRadius, shaftRadius - wallThickness);
         }
-        
+
         cylinder(height, r = shaftRadius - wallThickness);
-        
+
         translate([-shaftBendGap / 2, -shaftOpenRadius, 0])
         cube([shaftBendGap, shaftOpenRadius * 2, height]);
-        
+
         translate([-shaftGripRadius, shaftRadius - radialTolerance, shaftLength])
         cube([2 * shaftGripRadius, shaftGripRadius, shaftGripHeight * 3]);
-        
+
         translate([-shaftGripRadius, -shaftGripRadius - shaftRadius + radialTolerance, shaftLength])
         cube([2 * shaftGripRadius, shaftGripRadius, shaftGripHeight * 3]);
     }
@@ -142,16 +154,16 @@ module testAssembly() {
     intersection() {
         union() {
             mainBody();
-            
+
             translate([0, 0, height + verticalThickness + verticalTolerance])
             rotate([180, 0, 0])
             cover();
         }
-        
+
         rotate([0, 0, -1 * slotAngle + slotAngle / 2])
         translate([-1.5 * totalRadius, 0, 0])
         cube([3 * totalRadius, 2 * totalRadius, 2 * height]);
     }
 }
 
-cover();
+testAssembly();
