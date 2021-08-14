@@ -2,10 +2,13 @@ length = 190;
 width = 50;
 height = 45;
 
-thickness = 4.6;
+thickness = 5;
 roundness = 0.5;
 
-cutInMargin = 1.6;
+cutInDepth = 2.8;
+cutInSink = 1;
+drainRadius = 1;
+
 sideMargin = 4;
 holeMargin = 2.5;
 
@@ -64,9 +67,19 @@ module baseShape() {
 }
 
 module cutOut(diameter) {
-    translate([0, height - cutInMargin , width / 2])
-    rotate([90, 0, 0])
-    cylinder(d = diameter, h = height);
+    translate([0, height - thickness + cutInDepth , width / 2])
+    rotate([90, 0, 0]) {
+        cylinder(d = diameter, h = height);
+        
+        translate([0, 0, -thickness])
+        cylinder(r = drainRadius, h = height);
+        
+        translate([0, 0, -cutInSink])
+        cylinder(cutInSink, d1 = 0, d2 = diameter);
+    }
+    
+    translate([0, height, 0])
+    cylinder(r = drainRadius, h = width);
 }
 
 module cutOutPair() {
