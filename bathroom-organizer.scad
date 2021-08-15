@@ -2,10 +2,10 @@ length = 190;
 width = 50;
 height = 45;
 
-thickness = 5;
+thickness = 5.2;
 roundness = 0.5;
 
-cutInDepth = 2.8;
+cutInDepth = 2.5;
 cutInSink = 1;
 drainRadius = 1;
 
