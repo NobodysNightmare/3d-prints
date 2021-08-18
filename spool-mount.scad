@@ -32,7 +32,7 @@ adapterInsertShrink = 2;
 adapterInsertLength = 4;
 adapterThickness = 3;
 adapterGap = 10;
-adapterOverhang = 10;
+adapterOverhang = 12;
 adapterOverhangThickness = 5;
 
 armWidth = rodGrip + sideThickness;
@@ -121,16 +121,21 @@ module basePlate() {
 }
 
 module adapter() {
-    linear_extrude(adapterOverhangThickness)
-    difference() {
-        circle(d = spoolInnerDiameter + adapterOverhang);
+    intersection() {
+        linear_extrude(adapterOverhangThickness)
+        difference() {
+            circle(d = spoolInnerDiameter + adapterOverhang);
+            
+            circle(d = bearingGripDiameter);
+            
+            distance = spoolInnerDiameter / 2 + adapterOverhang;            
+            for(angle = [0:90:359])
+            translate([distance * sin(angle), distance * cos(angle)])
+            circle(r = adapterOverhang);
+        }
         
-        circle(d = bearingGripDiameter);
-        
-        distance = spoolInnerDiameter / 2 + adapterOverhang;            
-        for(angle = [0:90:359])
-        translate([distance * sin(angle), distance * cos(angle)])
-        circle(r = adapterOverhang);
+        translate([0, 0, -adapterOverhangThickness])
+        sphere(d = spoolInnerDiameter + adapterOverhang);
     }
     
     translate([0, 0, adapterOverhangThickness])
