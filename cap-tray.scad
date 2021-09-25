@@ -7,7 +7,7 @@ trayThickness = 0.8;
 verticalThickness = 1.2;
 tolerance = 0.4;
 
-armWidth = 4;
+armWidth = 6;
 holderBackThickness = 2;
 holderLockLength = 1.2;
 
