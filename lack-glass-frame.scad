@@ -35,6 +35,8 @@ hingeWiggle = 0.4;
 doorHingeWidth = 80;
 doorHingeHeight = 80;
 doorHingeLift = 1.8;
+doorGripDepth = 0.1;
+doorGripHeight = 0.6;
 
 hingeContactShiftLength = 10;
 
@@ -167,6 +169,12 @@ module bottomDoorHinge(hingeBlockModifier = doorHingeLift) {
             translate([-doorHingeWidth + outerRadius, hingeYCenterDistance, 0])
         framePiece(doorHingeWidth);
             
+            translate([-doorHingeWidth + outerRadius, hingeYCenterDistance + printThickness, frameHeight + printThickness - doorGripHeight])
+            cube([doorHingeWidth - frameHeight - printThickness, doorGripDepth, doorGripHeight]);
+            
+            translate([-doorHingeWidth + outerRadius, hingeYCenterDistance + printThickness + glassThickness - doorGripDepth, frameHeight + printThickness - doorGripHeight])
+            cube([doorHingeWidth - frameHeight - printThickness, doorGripDepth, doorGripHeight]);
+            
             translate([outerRadius, hingeYCenterDistance, 0])
             rotate([0, -90, 0])
             framePiece(doorHingeHeight);
@@ -215,6 +223,12 @@ module doorHandle() {
             
             translate([0, printThickness + glassThickness, 0])
             cube([printThickness + grippingWidth, magnetThickness + 0.8, grippingHeight]);
+            
+            translate([printThickness + grippingWidth - doorGripHeight, printThickness, 0])
+            cube([doorGripHeight, doorGripDepth, grippingHeight]);
+            
+            translate([printThickness + grippingWidth - doorGripHeight, printThickness + glassThickness - doorGripDepth, 0])
+            cube([doorGripHeight, doorGripDepth, grippingHeight]);
         }
         
         translate([0, printThickness + glassThickness, 2 * printThickness])
@@ -282,7 +296,7 @@ module ptfePassthroughLock() {
     }
 }
 
-ptfePassthroughLock();
+topDoorHinge();
 
 /*
 // hinge mechanism
