@@ -22,9 +22,15 @@ shaftRadius = 6;
 textPadding = 1;
 
 coverOverlap = 2;
+
+// Length of the straight part of the shaft the cover rotates around.
+// It should not be necessary to increase the length for higher boxes,
+// though shorter boxes might need a shorter shaft.
 shaftLength = 8.5;
+
 shaftGripRadius = 7;
-shaftGripHeight = 1;
+shaftGripHeight = 3;
+shaftGripRatio = 1 / 3; // balancing between inwards and outwards chamfer of grip
 shaftBendGap = 2.5 * (shaftGripRadius - shaftRadius);
 
 verticalThickness = 1.2;
@@ -63,10 +69,10 @@ module mainBody() {
             }
         }
 
-        translate([0, 0, height - shaftLength - shaftGripHeight + verticalTolerance])
-        cylinder(shaftGripHeight, shaftOpenRadius, shaftRadius + radialTolerance);
+        translate([0, 0, height - shaftLength - shaftGripHeight * shaftGripRatio + verticalTolerance])
+        cylinder(shaftGripHeight * shaftGripRatio, shaftOpenRadius, shaftRadius + radialTolerance);
 
-        linear_extrude(height - shaftLength - shaftGripHeight + verticalTolerance)
+        linear_extrude(height - shaftLength - shaftGripHeight * shaftGripRatio + verticalTolerance)
         circle(shaftOpenRadius);
 
         for(i = [0:len(slotLabels) - 1]) {
@@ -126,27 +132,35 @@ module slot() {
 }
 
 module shaft() {
+    assert(
+        height >= shaftLength + shaftGripHeight,
+        "Shaft is too long for box height. Remember to reduce the shaftLength, when reducing the height."
+    );
+    
     difference() {
         union() {
             cylinder(shaftLength, r = shaftRadius);
 
             translate([0, 0, shaftLength])
-            cylinder(shaftGripHeight, shaftRadius, shaftGripRadius);
+            cylinder(shaftGripHeight * shaftGripRatio, shaftRadius, shaftGripRadius);
 
-            translate([0, 0, shaftLength + shaftGripHeight])
-            cylinder(2 * shaftGripHeight, shaftGripRadius, shaftRadius - wallThickness);
+            translate([0, 0, shaftLength + shaftGripHeight * shaftGripRatio])
+            cylinder(shaftGripHeight * (1 - shaftGripRatio), shaftGripRadius, shaftRadius - wallThickness);
         }
 
-        cylinder(height, r = shaftRadius - wallThickness);
+        cylinder(shaftLength + shaftGripHeight + 0.01, r = shaftRadius - wallThickness);
 
+        // bend gap
         translate([-shaftBendGap / 2, -shaftOpenRadius, 0])
-        cube([shaftBendGap, shaftOpenRadius * 2, height]);
+        cube([shaftBendGap, shaftOpenRadius * 2, shaftLength + shaftGripHeight + 0.01]);
 
+        // side cut outs (helping during insertion, because bending only
+        // happens in one direction)
         translate([-shaftGripRadius, shaftRadius - radialTolerance, shaftLength])
-        cube([2 * shaftGripRadius, shaftGripRadius, shaftGripHeight * 3]);
+        cube([2 * shaftGripRadius, shaftGripRadius, shaftGripHeight]);
 
         translate([-shaftGripRadius, -shaftGripRadius - shaftRadius + radialTolerance, shaftLength])
-        cube([2 * shaftGripRadius, shaftGripRadius, shaftGripHeight * 3]);
+        cube([2 * shaftGripRadius, shaftGripRadius, shaftGripHeight]);
     }
 }
 
