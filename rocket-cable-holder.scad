@@ -1,4 +1,4 @@
-printThickness = 1.6;
+printThickness = 2.2;
 
 plateHeight = 21;
 plateDepth = 135;
