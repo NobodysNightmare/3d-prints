@@ -11,7 +11,7 @@ armWidth = 6;
 holderBackThickness = 2;
 holderLockLength = 1.2;
 
-armHeight = armWidth;
+armHeight = 9.6;
 
 module tray() {
     difference() { 
@@ -66,4 +66,4 @@ module testAssembly() {
     tray();
 }
 
-holder();
+testAssembly();

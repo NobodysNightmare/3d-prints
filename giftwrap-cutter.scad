@@ -1,8 +1,8 @@
 bladeLength = 23;
-bladeWidth = 4.5;
-bladeThickness = 0.4;
+bladeWidth = 5;
+bladeThickness = 0.65;
 
-bladeOpening = 2.5;
+bladeOpening = 2.0;
 bladeLeadInWidth = 10;
 bladeLeadInLength = 30;
 
@@ -10,7 +10,7 @@ bladeOffset = 10;
 
 bodyDiameter = 55;
 bodyLength = 70;
-bodyThickness = 3;
+bodyThickness = 4;
 
 $fa = 1;
 $fs = 1;
@@ -24,7 +24,7 @@ module cutter() {
         translate([0, 0, -0.01])
         cylinder(bodyLength + 0.02, d = bodyDiameter);
         
-        translate([-bladeWidth / 2, -(bodyDiameter + bodyThickness) / 2, bladeOffset])
+        translate([-bladeWidth / 2, -(bodyDiameter + bodyThickness + bladeThickness) / 2, bladeOffset])
         bladeCutOut();
     }
 }
