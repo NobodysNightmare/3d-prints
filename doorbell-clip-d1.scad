@@ -11,7 +11,7 @@ mountBottomThickness = 2;
 mountBackgroundThickness = 1.2;
 mountGripThickness = 3;
 
-mountGripHeightOffset = 4;
+mountGripHeightOffset = 5;
 mountGripHeight = 5;
 mountGripLength = 20 + 7;
 mountGripLengthSpacer = 7;
@@ -76,7 +76,7 @@ module fullAssembly() {
     translate([-clipHookDepth, -clipHookThickness - clipHookOpening, 0])
     clipHook();
     
-    translate([buildPlateX, (clipHeight - moduleMountHeight), (clipWidth - moduleMountWidth) / 2])
+    translate([buildPlateX, (clipHeight - moduleMountHeight) / 2, (clipWidth - moduleMountWidth) / 2])
     moduleMount();
 }
 
