@@ -130,11 +130,11 @@ module mainCase() {
         translate([caseWidth - apertureTotalWidth - apertureWidth / 2, 0, verticalThickness])
         ventilationSlots(apertureTotalWidth, sensorLength / 2);
         
-        translate([espBoardPCBLength / 2, 0, bottomVentilationZOffset])
-        ventilationSlots(espBoardPCBLength / 2, ventilationHeight);
+        translate([wallThickness, 0, bottomVentilationZOffset])
+        ventilationSlots(espBoardPCBLength, ventilationHeight);
         
-        translate([espBoardPCBLength / 2, 0, verticalThickness])
-        ventilationSlots(espBoardPCBLength / 2, ventilationHeight);
+        translate([wallThickness, 0, verticalThickness])
+        ventilationSlots(espBoardPCBLength, ventilationHeight);
         
         translate([caseWidth - isolatedSensorSpaceInnerWidth, 0, bottomVentilationZOffset])
         ventilationSlots(isolatedSensorSpaceInnerWidth - 2 * wallThickness, ventilationHeight);
@@ -271,16 +271,16 @@ module espMount() {
     // main grip
     translate([0, espBoardWidth - espMountMainGrip, espMountLift]) {
         // lower
-        cube([espBoardPCBLength, wallThickness + espMountMainGrip, espMountGripThickness]);
+        cube([espBoardPCBLength, espMountCounterSupportWidth, espMountGripThickness]);
         
         // middle cushion to support lower from wall
         translate([(espBoardPCBLength - wallThickness) / 2, espMountMainGrip + wallThickness, -espMountCushionHeight])
         scale([1, -1, 1])
-        cushion(wallThickness, espMountCushionHeight, wallThickness + espMountMainGrip);
+        cushion(wallThickness, espMountCushionHeight, wallThickness);
         
         // main support
-        translate([0, espMountMainGrip, espMountGripThickness])
-        cube([espBoardPCBLength, wallThickness, espBoardThickness]);
+        translate([0, espMountMainGrip, 0])
+        cube([espBoardPCBLength, wallThickness, espMountGripThickness + espBoardThickness]);
         
         // left lock
         translate([0, 0, espMountGripThickness + espBoardThickness])
@@ -345,6 +345,10 @@ module espMount() {
     // counter lower center stand-off
     // aligning with display lock to avoid blocking cable flow
     translate([espBoardPCBLength / 2, espPinHeaderWidth, 0])
+    cube([espMountPillarThickness, espMountCounterSupportWidth, espMountLift]);
+    
+    // main lower center stand-off
+    translate([espBoardPCBLength / 2, espBoardWidth - espPinHeaderWidth - espMountCounterSupportWidth, 0])
     cube([espMountPillarThickness, espMountCounterSupportWidth, espMountLift]);
 }
 

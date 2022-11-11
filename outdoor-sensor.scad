@@ -23,8 +23,14 @@ sensorHoleDiameter = 5;
 sensorMargin = 3;
 sensorWidth = 16;
 sensorScrewOffset = 30;
-sensorThickness = 8;
+sensorThickness = 10;
 sensorScrewDiameter = 3;
+
+sensorGrillMargin = 1.2;
+sensorGrillOpening = 0.9;
+sensorGrillSpacing = 1.5;
+
+wallIsolation = 1.2;
 
 usbWidth = 8;
 usbHeight = 2.7;
@@ -128,30 +134,63 @@ module mainCase() {
 }
 
 module frontWall() {
+    translate([0, -wallThickness - wallIsolation, 0])
     difference() {
-        cube([caseWidth, wallThickness, caseHeight]);
+        doubleWall(caseWidth, caseHeight, wallThickness, wallIsolation);
         
-        translate([caseWidth - wallThickness - sensorHoleDiameter / 2, wallThickness / 2, sensorMargin + sensorWidth / 2 + sensorHoleDiameter / 2])
-        rotate([90, 0, 0])
-        cylinder(d = sensorHoleDiameter, h = wallThickness * 2, center = true);
+        translate([caseWidth - wallThickness - sensorHoleDiameter / 2, -0.01, sensorMargin + sensorWidth / 2 + sensorHoleDiameter / 2])
+        rotate([-90, 0, 0])
+        cylinder(d = sensorHoleDiameter, h = wallThickness * 2 + wallIsolation + 0.02);
         
-        translate([wallThickness + sensorMargin + sensorScrewOffset, wallThickness / 2, sensorMargin + sensorWidth / 2 + sensorHoleDiameter / 2])
-        rotate([90, 0, 0])
-        cylinder(d = sensorScrewDiameter, h = wallThickness * 2, center = true);
+        translate([wallThickness + sensorMargin + sensorScrewOffset, -0.01, sensorMargin + sensorWidth / 2 + sensorHoleDiameter / 2])
+        rotate([-90, 0, 0])
+        cylinder(d = sensorScrewDiameter, h = wallThickness * 2 + wallIsolation + 0.02);
     }
     
+    translate([0, -wallThickness - wallIsolation, 0])
     translate([0, -sensorThickness, 0]) {
-        cube([wallThickness, sensorThickness, caseHeight]);
-        
+        sensorCoverWall();
+    
         translate([caseWidth - wallThickness, 0, 0])
-        cube([wallThickness, sensorThickness, caseHeight]);
+        sensorCoverWall();
         
         translate([0, 0, caseHeight - verticalThickness])
         cube([caseWidth, sensorThickness, verticalThickness]);
         
-        translate([(caseWidth - wallThickness) / 2, sensorThickness, caseHeight - verticalThickness - sensorThickness / 2])
+        translate([(caseWidth - wallThickness) / 2, sensorThickness, caseHeight - verticalThickness - sensorThickness * 0.4])
         scale([1, -1, 1])
-        cushion(wallThickness, sensorThickness / 2, sensorThickness);
+        cushion(wallThickness, sensorThickness * 0.4, sensorThickness);
+    }
+}
+
+module doubleWall(width, height, thickness, spacing) {
+    cube([width, thickness, height]);
+    
+    translate([0, thickness + spacing, 0])
+    cube([width, thickness, height]);
+    
+    translate([0, thickness, 0]) {
+        cube([width, spacing, thickness]);
+        
+        translate([0, 0, height - thickness])
+        cube([width, spacing, thickness]);
+        
+        translate([0, 0, thickness])
+        cube([thickness, spacing, height - 2 * thickness]);
+        
+        translate([width - thickness, 0, thickness])
+        cube([thickness, spacing, height - 2 * thickness]);
+    }
+}
+
+module sensorCoverWall() {
+    difference() {
+        cube([wallThickness, sensorThickness, caseHeight]);
+        
+        for(z = [sensorGrillSpacing:sensorGrillSpacing+sensorGrillOpening:caseHeight-sensorGrillSpacing-sensorGrillOpening]) {
+            translate([-0.01, sensorGrillMargin, z])
+            cube([wallThickness + 0.02, sensorThickness - 2 * sensorGrillMargin, sensorGrillOpening]);
+        }
     }
 }
 
@@ -159,16 +198,16 @@ module espMount() {
     // main grip
     translate([0, espBoardWidth - espMountMainGrip, espMountLift]) {
         // lower
-        cube([espBoardPCBLength, wallThickness + espMountMainGrip, espMountGripThickness]);
+        cube([espBoardPCBLength, espMountCounterSupportWidth, espMountGripThickness]);
         
         // middle cushion to support lower from wall
         translate([(espBoardPCBLength - wallThickness) / 2, espMountMainGrip + wallThickness, -espMountCushionHeight])
         scale([1, -1, 1])
-        cushion(wallThickness, espMountCushionHeight, wallThickness + espMountMainGrip);
+        cushion(wallThickness, espMountCushionHeight, wallThickness);        
         
         // main support
-        translate([0, espMountMainGrip, espMountGripThickness])
-        cube([espBoardPCBLength, wallThickness, espBoardThickness]);
+        translate([0, espMountMainGrip, 0])
+        cube([espBoardPCBLength, wallThickness, espMountGripThickness + espBoardThickness]);
         
         // left lock
         translate([0, 0, espMountGripThickness + espBoardThickness])
@@ -224,6 +263,10 @@ module espMount() {
     // the long bridge of the main mount
     translate([espBoardPCBLength + espMountPillarThickness, 0, espMountLift - espMountCushionHeight / 2])
     cube([espBoardTotalLength - espBoardPCBLength - espMountPillarThickness, wallThickness, 2 * layerHeight]);
+    
+    // main lower center stand-off
+    translate([espBoardPCBLength / 2, espBoardWidth - espMountCounterSupportWidth - espPinHeaderWidth, 0])
+    cube([espMountPillarThickness, espMountCounterSupportWidth, espMountLift]);
     
     // counter side center stand-off
     translate([espBoardPCBLength / 2, -wallThickness, 0])
