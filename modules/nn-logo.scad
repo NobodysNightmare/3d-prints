@@ -13,4 +13,14 @@ module nnLogo(width, height) {
     }
 }
 
-nnLogo(50, 3);
+module nnCutout(width) {
+    scaleFactor = width / 88;
+
+    scale([scaleFactor, scaleFactor, 1])
+    difference() {
+        import("printable-avatar.svg", center = true);
+        import("avatar-border.svg", center = true);
+    }
+}
+
+nnCutout(50);
