@@ -180,4 +180,11 @@ module testAssembly() {
     }
 }
 
-testAssembly();
+module printReady() {
+    mainBody();
+    
+    translate([2 * totalRadius + coverOverlap + 5, 0, 0])
+    cover();
+}
+
+printReady();
