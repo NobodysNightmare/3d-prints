@@ -29,16 +29,17 @@ grillHeight = 5;
 grillScale = 10;
 grillClearance = 4;
 
+extensionAngle = 90 - atan(extensionWidth / (depth / 2));
+extensionEdgeLength = sqrt(extensionWidth^2 + (depth / 2)^2);
+
 basinBaseHeight = basinClearance + basinMinThickness;
 height = basinBaseHeight + max(basinHeightDifference, drainDiameter) + grillClearance + grillHeight;
 grillTileW = (baseWidth + 2 * extensionWidth) / grillScale;
 grillTileH = depth / grillScale;
-grillTileXSpacing = grillThickness / 2 + grillTileW + baseWidth / grillScale;
+grillTileXOffset = grillThickness / sin(extensionAngle) + grillThickness / tan(extensionAngle);
+grillTileXSpacing = grillTileXOffset + grillTileW + baseWidth / grillScale;
 grillTileYSpacing = grillThickness / 2 + grillTileH / 2;
-activeXAlign = grillThickness / 4 + grillTileW - extensionWidth / grillScale;
-
-extensionAngle = 90 - atan(extensionWidth / (depth / 2));
-extensionEdgeLength = sqrt(extensionWidth^2 + (depth / 2)^2);
+activeXAlign = grillTileXOffset / 2 + grillTileW - extensionWidth / grillScale;
 
 $fn = $preview ? 32 : 256;
 
