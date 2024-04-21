@@ -1,15 +1,16 @@
-fieldWidth = 120;
-fieldHeight = 40;
-borderWidth = 2;
+fieldWidth = 100;
+fieldHeight = 100;
+borderWidth = 4;
 
-signThickness = 3.0;
-textThickness = 1.2;
-chamferAmount = 1;
+signThickness = 3.3;
+textThickness = 1.8;
+chamferAmount = 2;
 
-coverThickness = 1.2;
-coverTolerance = 0.2;
+coverThickness = 1.5;
+coverSideThickness = 2.0;
+coverTolerance = 0.5;
 
-endStopThickness = 0.6;
+endStopThickness = 1.2;
 endStopHeight = 4;
 
 textHeight = fieldHeight - 4;
@@ -21,11 +22,12 @@ module sign() {
     difference() {
         signPlate();
         
-        textImpression("rein");
+        svgImpression("symbols/checkmark.svg", 9.7, 10);
         
         translate([fieldWidth + borderWidth, 0, 0])
-        textImpression("raus");
+        svgImpression("symbols/crossmark.svg", 9.7, 10);
     }
+    
     
     endStop();
     
@@ -61,17 +63,30 @@ module textImpression(t) {
     difference() {
         cube([fieldWidth, fieldHeight, textThickness + 0.01]);
         
-        translate([fieldWidth / 2, borderWidth + (fieldHeight - textHeight) / 2, -0.01])
+        translate([fieldWidth / 2, (fieldHeight - textHeight) / 2, -0.01])
         linear_extrude(textThickness + 0.03)
         text(t, size = textHeight, halign = "center");
     }
 }
 
+module svgImpression(svg, svgWidth, svgHeight) {
+    translate([borderWidth, borderWidth, signThickness - textThickness])
+    difference() {
+        cube([fieldWidth, fieldHeight, textThickness + 0.01]);
+        
+        translate([fieldWidth / 2, fieldHeight / 2, -0.01])
+        linear_extrude(textThickness + 0.03)
+        scale([textHeight / svgHeight, textHeight / svgHeight])
+        translate([-svgWidth / 2, -svgHeight / 2])
+        import(svg);
+    }
+}
+
 module cover() {
     difference() {
-        cube([fieldWidth + borderWidth, signHeight + 2 * coverThickness, signThickness + coverThickness]);
+        cube([fieldWidth + borderWidth, signHeight + 2 * coverThickness, signThickness + coverSideThickness]);
         
-        translate([-0.01, coverThickness, -0.01])
+        translate([-0.01, coverSideThickness, -0.01])
         rotate([90, 0, 90])
         linear_extrude(signWidth)
         polygon([
@@ -81,10 +96,10 @@ module cover() {
             [-coverTolerance, signThickness]
         ]);
         
-        translate([-0.01, coverThickness + (signHeight - coverStopCutHeight) / 2, signThickness - 0.02])
+        translate([-0.01, coverSideThickness + (signHeight - coverStopCutHeight) / 2, signThickness - 0.02])
         cube([borderWidth + coverTolerance + 0.01, coverStopCutHeight, endStopThickness + 0.02]);
         
-        translate([fieldWidth - coverTolerance, coverThickness + (signHeight - coverStopCutHeight) / 2, signThickness - 0.02])
+        translate([fieldWidth - coverTolerance, coverSideThickness + (signHeight - coverStopCutHeight) / 2, signThickness - 0.02])
         cube([borderWidth + coverTolerance + 0.01, coverStopCutHeight, endStopThickness + 0.02]);
     }
 }
@@ -92,13 +107,13 @@ module cover() {
 module testAssembly() {
     sign();
     
-    translate([0, -coverThickness, coverTolerance / 2])
+    translate([0, -coverSideThickness, coverTolerance / 2])
     cover();
     
     translate([0, signHeight + 5, 0]) {
         sign();
         
-        translate([fieldWidth + 2 * borderWidth, -coverThickness, coverTolerance / 2])
+        translate([fieldWidth + 2 * borderWidth, -coverSideThickness, coverTolerance / 2])
         cover();
     }
 }
