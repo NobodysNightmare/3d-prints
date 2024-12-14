@@ -2,27 +2,32 @@ size = 320;
 height = 17.32;
 wallT = 1.2;
 
-stdWidth = 60;
-stdDepth = 11;
-
 spacerWidth = 53;
 spacerHeight = 100;
 
-smHex = 34.2;
+spacerBoxDepth = spacerWidth + 2 * wallT;
+
+smHex = 34.5;
+hexFloor = 0.2;
+hexHoleD = 20;
 
 railBottomT = 5;
 railAreaDepth = smHex * 1.75;
 
+stdWidth = 60;
+stdDepth = 11;
+
+trayDepth = size - spacerBoxDepth - railAreaDepth;
 targetMargins = [2, 4];
 
 cols = floor((size - targetMargins.x) / (stdWidth + targetMargins.x));
-rows = 10;
+rows = floor((trayDepth - targetMargins.y) / (stdDepth + targetMargins.y));
 margins = [
     (size - cols * stdWidth) / (cols + 1),
-    targetMargins.y
+    (trayDepth - rows * stdDepth) / (rows + 1),
 ];
 
-spacerBoxDepth = spacerWidth + 2 * wallT;
+echo(str("Tray can fit ", cols * rows, " pieces."));
 
 module standardInset() {
     rotate([90, 0, 0])
@@ -32,6 +37,15 @@ module standardInset() {
         [stdWidth / 2, 0],
         [stdWidth, height + 0.01]
     ]);
+}
+
+module hexBase() {
+    translate([0, 0, hexFloor])
+    linear_extrude(height)
+    hexagon(smHex);
+    
+    translate([0, 0, -0.01])
+    cylinder(d = hexHoleD, h = height + 0.02, $fn = 256);
 }
 
 module hexagon(d) {
@@ -55,22 +69,25 @@ difference() {
         standardInset();
     }
     
+    // Box for vertical spacers
     translate([wallT, size - spacerWidth - wallT, wallT])
     cube([size - 2 * wallT, spacerWidth, spacerHeight]);
     
+    // flat area with mounts for Rail holders
     translate([-0.01, size - spacerBoxDepth - railAreaDepth, railBottomT])
     cube([size + 0.02, railAreaDepth, height]);
     
-    translate([smHex / 2 - 2.1 + 50, size - spacerBoxDepth - smHex / 2 - 0.75 * smHex, -0.01])
-    linear_extrude(height + 0.02)
-    hexagon(smHex);
+    translate([smHex / 2 - 2.1 + 50, size - spacerBoxDepth - smHex / 2 - 0.75 * smHex, 0])
+    hexBase();
     
-    translate([smHex / 2 - 2.1 + 80, size - spacerBoxDepth - smHex / 2, -0.01])
-    linear_extrude(height + 0.02)
-    hexagon(smHex);
+    translate([smHex / 2 - 2.1 + 80, size - spacerBoxDepth - smHex / 2, 0])
+    hexBase();
     
-    translate([smHex / 2 - 2.1 + 80 + 30 + 128, size - spacerBoxDepth - smHex / 2, -0.01])
-    linear_extrude(height + 0.02)
-    hexagon(smHex);
+    // spacing 126mm away from previous holder to fit 2x and 3x rails next to each other
+    translate([smHex / 2 - 2.1 + 80 + 30 + 126, size - spacerBoxDepth - smHex / 2, 0])
+    hexBase();
+    
+    translate([smHex / 2 - 2.1 + 50 + 156, size - spacerBoxDepth - smHex / 2 - 0.75 * smHex, 0])
+    hexBase();
 }
 
