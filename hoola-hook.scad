@@ -6,6 +6,8 @@ hookDepth = 40;
 hookLength = 25;
 hookTipWidth = 4;
 
+hoolaDiameter = 40;
+
 // TODO
 screwDiameter = 4;
 screwHeadDiameter = 8;
@@ -13,10 +15,15 @@ screwHeadHeight = 2;
 
 hookThinning = (width - hookTipWidth) / 2;
 
+$fn = 128;
+
 use <modules/screw-hole.scad>
 
 module hook() {
     base();
+    
+    translate([thickness, 0, 0])
+    curveFit();
     
     singleHook();
     
@@ -48,6 +55,17 @@ module singleHook() {
         [width - hookThinning, hookLength],
         [hookThinning, hookLength]
     ]);
+}
+
+module curveFit() {
+    translate([hoolaDiameter / 2, hoolaDiameter / 2, 0])
+    linear_extrude(width)
+    difference() {
+        translate([-hoolaDiameter / 2, -hoolaDiameter / 2, 0])
+        square([hoolaDiameter / 2, hoolaDiameter / 2]);
+        
+        circle(d=hoolaDiameter);
+    }
 }
 
 hook();
